@@ -73,7 +73,7 @@ At this point, if the extension was automatically approved, nothing else needs t
 1. Staff deliberate on the extension request in a thread.
 
 
-​	<img src="README.assets/image-20220116204446963.png" alt="image-20220116204446963" style="zoom:30%;" />
+![image-20220116204344723](README.assets/image-20220116204446963.png | width=100)
 
 2. Staff come to an agreement.
    - If approved (or approved with modification) –
