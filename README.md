@@ -64,16 +64,20 @@ Here's the overall flow of the function:
    - **If the extension requires manual approval** (e.g. it's more than three days), the function updates the `approval_status` column to **Pending** and the `email_status` column to **Pending Approval**. Then, it sends this to a private Slack channel:
      ![image-20220116204242900](README.assets/image-20220116204242900.png)
 
+---
+
 At this point, if the extension was automatically approved, nothing else needs to happen. The student will receive an email immediately that looks something like the following (please pardon the off-centered text; this is a proof-of-concept.)
 
 ![image-20220116204344723](README.assets/image-20220116204344723.png)
+
+---
 
 **However, if the extension requires manual approval, then a few additional steps occur.** 
 
 1. Staff deliberate on the extension request in a thread.
 
 
-​	<img src="README.assets/image-20220116204446963.png" alt="image-20220116204446963" width="200" />
+​	<img src="README.assets/image-20220116204446963.png" alt="image-20220116204446963" width="400" />
 
 2. Staff come to an agreement.
    - If approved (or approved with modification) –
@@ -87,6 +91,7 @@ At this point, if the extension was automatically approved, nothing else needs t
      - Staff follow up with the student over email, and set the **Email Status** column to **Manually Sent**.
 
 
+---
 
 ### Handling Failures
 
@@ -94,6 +99,8 @@ At this point, if the extension was automatically approved, nothing else needs t
 - If an action fails halfway through a transaction, then the email is not sent and staff are paged on Slack for manual intervention.
   - "Manual Intervention" may involve manually looking at form responses and translating them into the roster.
   - If the number of failures is quite large (e.g. multiple form responses were not processed), it's possible to write a script to batch "resubmit the form" on behalf of students, which will trigger new function invocations automatically (e.g. after a bug has been fixed).
+
+---
 
 ### Design Philosophy
 
