@@ -5,13 +5,13 @@ A file used for local testing.
 import json
 from dotenv import load_dotenv
 
-from core import form, email
+from src.handle_form_submit import handle_form_submit
 
 load_dotenv()  # take environment variables from .env.
 
 
 def test():
-    form.handle_form_submit(
+    handle_form_submit(
         {
             "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1MsGh1OFPltaoXGF8kv0e-O9WAFoaxcbFA6HVM7AbFOQ/edit?resourcekey#gid=790260459",
             "form_data": json.load(open("test_data/knows_assignments.json")),
