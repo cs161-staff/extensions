@@ -42,6 +42,12 @@ class FormSubmission:
     def knows_assignments(self) -> bool:
         return self.responses["knows_assignments"] == "Yes"
 
+    def get_raw_requests(self) -> str:
+        return self.responses['assignments']
+
+    def get_raw_days(self) -> str:
+        return self.responses['days']
+
     def get_requests(self, assignment_manager: AssignmentManager) -> Dict[str, Any]:
         """
         Fetch a map of ID to # days requested.

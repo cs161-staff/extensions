@@ -41,7 +41,6 @@ def send_needs_manual_approval(
             rows.append([assignment["name"], student_record[assignment_id]])
     text += "```"
     text += tabulate(rows, headers=headers)
-
     text += "```"
 
     response = webhook.send(

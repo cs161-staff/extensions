@@ -6,14 +6,14 @@ from src.sheets import Sheet
 
 class Environment:
     @staticmethod
-    def get_variable(key: str) -> Any:
+    def get(key: str) -> Any:
         if not os.getenv(key):
             raise ConfigurationError("Environment variable not set.")
         return os.getenv(key)
         
     @staticmethod
     def get_auto_approve_threshold() -> int:
-        return int(Environment.get_variable("AUTO_APPROVE_THRESHOLD"))
+        return int(Environment.get("AUTO_APPROVE_THRESHOLD"))
 
     @staticmethod
     def configure_env_vars(sheet: Sheet):

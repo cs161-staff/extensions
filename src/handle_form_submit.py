@@ -1,5 +1,6 @@
 from src import submission
 from src.assignments import AssignmentManager
+from src.email import Email
 from src.errors import ConfigurationError, FormInputError, KnownError
 from src.record import (
     APPROVAL_STATUS_AUTO_APPROVED,
@@ -51,7 +52,7 @@ def handle_form_submit(request_json):
 
     # Get a pointer to Slack, and set the current student
     slack = SlackManager()
-    slack.set_current_student(submission=submission, student=student)
+    slack.set_current_student(submission=submission, student=student, assignment_manager=assignment_manager)
 
     # Core logic goes here.
     log_records = []
@@ -92,12 +93,12 @@ def handle_form_submit(request_json):
         if student.approval_status() == APPROVAL_STATUS_REQUESTED_MEETING:
             # Student has a pending meeting request, so not updating approval.
             student.dispatch_writes()
-            slack.send_student_update("A student with a pending support meeting submitted an extension request.")
+            slack.send_student_update("*[Action Required]* A student with a pending support meeting submitted an extension request, so the request could not be approved automatically!")
 
         elif student.approval_status() == APPROVAL_STATUS_PENDING:
             # Student has a pending extension request, so not auto-approving even if this request is approvable.
             student.dispatch_writes()
-            slack.send_student_update("A student with pending extension requests submitted another extension request.")
+            slack.send_student_update("*[Action Required]* A student with pending extension requests submitted another extension request, so the request could not be approved automatically!")
 
         else:
             if needs_human:
@@ -105,7 +106,7 @@ def handle_form_submit(request_json):
                 student.queue_approval_status(APPROVAL_STATUS_PENDING)
                 student.queue_email_status(EMAIL_STATUS_PENDING)
                 student.dispatch_writes()
-                slack.send_student_update("An extension request could not be auto-approved.")
+                slack.send_student_update("*[Action Required]* An extension request could not be auto-approved!")
 
             else:
                 # Auto-approve the request
@@ -116,7 +117,8 @@ def handle_form_submit(request_json):
 
                 # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
                 try:
-                    student.send_email_update()
+                    email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
+                    email.preview()
                 except Exception as err:
                     raise KnownError(
                         "Writes to spreadsheet succeed, but email to student failed.\n"
@@ -124,10 +126,10 @@ def handle_form_submit(request_json):
                         + "Error: "
                         + str(err)
                     )
-                slack.send_student_update("An extension request was automatically approved.")
+                slack.send_student_update("An extension request was automatically approved!")
 
     else:
         log("Student requested general extension without specific assignments...")
         student.queue_approval_status(APPROVAL_STATUS_REQUESTED_MEETING)
         student.dispatch_writes()
-        slack.send_student_update("A student requested a student support meeting.")
+        slack.send_student_update("*[Action Required]* A student requested a student support meeting.")

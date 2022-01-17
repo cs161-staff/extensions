@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 from src.errors import ConfigurationError
 from src.sheets import Sheet
@@ -35,3 +36,9 @@ class AssignmentManager:
 
     def get_all_ids(self) -> List[str]:
         return [record.get('id') for record in self.records]
+
+    def get_due_date(self, assignment_id: str) -> str:
+        for record in self.records:
+            if record["id"] == assignment_id:
+                return record["due_date"]
+        raise ConfigurationError(f"Assignment with ID {assignment_id} not found.")

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 from src.assignments import AssignmentManager
 
 from src.errors import StudentRecordError
@@ -42,8 +42,8 @@ class StudentRecord:
     def get_status(self):
         return self.table_record["approval_status"]
 
-    def get_email_comments(self):
-        return self.table_record["email_comments"]
+    def get_email_comments(self) -> None:
+        return self.table_record.get("email_comments")
 
     def get_email_status(self):
         return self.table_record["email_status"]
@@ -96,6 +96,6 @@ class StudentRecord:
             row_index = self.table_index
             col_index = headers.index(col_key)
             self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
-
-    def send_email_update(self):
-        raise NotImplementedError()
+            # once writes are dispatched to backend, update the local object as well (this is so that it shows
+            # up in the email that's generated)
+            self.table_record[col_key] = value
