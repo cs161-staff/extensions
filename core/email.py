@@ -40,7 +40,7 @@ def process_email_queue(request_json):
     config = extract_config(fetch_table(spreadsheet=spreadsheet, name="Configuration"))
 
     # Extract student records.
-    table = fetch_table(spreadsheet=spreadsheet, name="All Extensions")
+    table = fetch_table(spreadsheet=spreadsheet, name="Roster")
     headers = extract_headers(table=table)
     records = extract_records(table=table, index_by="sid", include_row_number=True)
 
@@ -51,7 +51,7 @@ def process_email_queue(request_json):
 
     # TODO: This is copied from form.py, so abstract away into a StudentRecord object.
     def update_student_record(write_back_index, write_back):
-        master_table = spreadsheet.worksheet("All Extensions")
+        master_table = spreadsheet.worksheet("Roster")
         for column_key, value in write_back.items():
             # One-indexed, and skip header, so add two
             row_index = write_back_index + 2

@@ -45,7 +45,7 @@ def handle_form_submit(request_json: Dict[str, Any]):
     config = extract_config(fetch_table(spreadsheet=spreadsheet, name="Configuration"))
 
     # Extract the student record and row index.
-    table = fetch_table(spreadsheet=spreadsheet, name="All Extensions")
+    table = fetch_table(spreadsheet=spreadsheet, name="Roster")
     headers = extract_headers(table=table)
     records = extract_records(table=table, index_by="sid")
 
@@ -104,7 +104,7 @@ def handle_form_submit(request_json: Dict[str, Any]):
         slack.send_needs_manual_approval(spreadsheet_url=spreadsheet_url, student_record=student_record, form=form, all_assignments=all_assignments)
         write_back["email_status"] = EMAIL_PENDING_APPROVAL
 
-    master_table = spreadsheet.worksheet("All Extensions")
+    master_table = spreadsheet.worksheet("Roster")
     for column_key, value in write_back.items():
         # One-indexed, and skip header, so add two
         row_index = write_back_index + 2
