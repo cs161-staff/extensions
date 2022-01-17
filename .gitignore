@@ -1,3 +1,4 @@
+core/__pycache__/*
 .env
 service-account.json
 creds.json

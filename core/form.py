@@ -6,7 +6,7 @@ from core.constants import (
     STATUS_AUTO_APPROVED,
     STATUS_PENDING,
 )
-from core import email
+from core import email, slack
 from core.errors import InternalError, UserError
 from core.sheets import extract_config, extract_headers, extract_records, fetch_table
 from gspread.spreadsheet import Spreadsheet
@@ -98,7 +98,9 @@ def handle_form_submit(request_json: Dict[str, Any]):
         print("Sending email...")
         email.send_email(record=student_record, all_assignments=all_assignments, config=config)
         write_back["email_status"] = EMAIL_AUTO_SENT
+        slack.send_auto_approved(student_record=student_record, form=form)
     else:
+        slack.send_needs_manual_approval(student_record=student_record, form=form, all_assignments=all_assignments)
         write_back["email_status"] = EMAIL_PENDING_APPROVAL
 
     master_table = spreadsheet.worksheet("All Extensions")

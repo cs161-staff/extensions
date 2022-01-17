@@ -22,12 +22,13 @@ def send_email_sendgrid(from_email: str, to_email: str, cc_email: str, reply_to:
     )
     message.add_cc(cc_email)
     message.reply_to = reply_to
-    try:
-        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-        sg.send(message)
-    except Exception as e:
-        print(message)
-        print(e.body)
+    print("TODO: Bring email back in.")
+    # try:
+    #     sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+    #     sg.send(message)
+    # except Exception as e:
+    #     print(message)
+    #     print(e.body)
 
 
 def process_email_queue(request_json):
