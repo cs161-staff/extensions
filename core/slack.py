@@ -25,7 +25,9 @@ def send_auto_approved(student_record: Dict[str, Any], form: Dict[str, Any]):
     webhook.send(text=text)
 
 
-def send_needs_manual_approval(student_record: Dict[str, Any], all_assignments: Dict[str, Any], form: Dict[str, Any]):
+def send_needs_manual_approval(
+    spreadsheet_url: str, student_record: Dict[str, Any], all_assignments: Dict[str, Any], form: Dict[str, Any]
+):
     webhook = WebhookClient(os.environ.get("SLACK_ENDPOINT"))
     text = "An extension request could not be auto-approved. Details:" + "\n"
     text += get_form_details(form) + "\n"
@@ -42,19 +44,26 @@ def send_needs_manual_approval(student_record: Dict[str, Any], all_assignments: 
 
     text += "```"
 
-    webhook.send(blocks=[
+    response = webhook.send(
+        blocks=[
             {"type": "section", "text": {"type": "mrkdwn", "text": text}},
             {
                 "type": "actions",
                 "block_id": "approve_extension",
                 "elements": [
+                    # {
+                    #     "type": "button",
+                    #     "text": {"type": "plain_text", "text": "Approve"},
+                    #     "style": "primary",
+                    #     "value": student_record["sid"],
+                    # },
                     {
                         "type": "button",
-                        "text": {"type": "plain_text", "text": "Approve"},
-                        "style": "primary",
-                        "value": student_record['sid'],
-                    }
+                        "text": {"type": "plain_text", "text": "View Spreadsheet"},
+                        "url": spreadsheet_url,
+                    },
                 ],
             },
         ]
     )
+    print(response.body)

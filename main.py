@@ -5,6 +5,17 @@ from core import form, email
 
 load_dotenv()  # take environment variables from .env.
 
+def handle_slack_action(request):
+    request_json = request.get_json()
+    payload = request_json['payload']
+    print(payload)
+    
+    # Attempt to do approval
+    sid = '3033748423'
+
+    
+
+
 def process_email_queue(request):
     """Responds to any HTTP request.
     Args:

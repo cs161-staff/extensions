@@ -29,7 +29,8 @@ def preprocess_form_response(spreadsheet: Spreadsheet, form_response: Dict[str, 
 def handle_form_submit(request_json: Dict[str, Any]):
     # Get a handle to the spreadsheet.
     gc = gspread.service_account("service-account.json")
-    spreadsheet = gc.open_by_url(request_json["spreadsheet_url"])
+    spreadsheet_url = request_json["spreadsheet_url"]
+    spreadsheet = gc.open_by_url(spreadsheet_url)
     form_data = request_json["form_data"]
 
     # Transform the response into the format that we want.
@@ -100,7 +101,7 @@ def handle_form_submit(request_json: Dict[str, Any]):
         write_back["email_status"] = EMAIL_AUTO_SENT
         slack.send_auto_approved(student_record=student_record, form=form)
     else:
-        slack.send_needs_manual_approval(student_record=student_record, form=form, all_assignments=all_assignments)
+        slack.send_needs_manual_approval(spreadsheet_url=spreadsheet_url, student_record=student_record, form=form, all_assignments=all_assignments)
         write_back["email_status"] = EMAIL_PENDING_APPROVAL
 
     master_table = spreadsheet.worksheet("All Extensions")
