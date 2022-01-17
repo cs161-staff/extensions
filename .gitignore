@@ -1,0 +1,5 @@
+.env
+service-account.json
+creds.json
+extensions/
+.DS_Store
