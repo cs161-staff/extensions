@@ -22,7 +22,7 @@ from src.sheets import (
 )
 
 # TODO: What about retroactive extensions?
-
+# TODO: What about partners?
 
 def handle_form_submit(request_json):
     if "spreadsheet_url" not in request_json or "form_data" not in request_json:
@@ -118,7 +118,7 @@ def handle_form_submit(request_json):
                 # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
                 try:
                     email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
-                    email.preview()
+                    email.send()
                 except Exception as err:
                     raise KnownError(
                         "Writes to spreadsheet succeed, but email to student failed.\n"

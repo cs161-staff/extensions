@@ -2,6 +2,7 @@ from __future__ import annotations
 import datetime
 from typing import List
 from src.errors import EmailError
+from sendgrid.helpers.mail import Cc
 
 from src.utils import Environment
 from src.record import StudentRecord
@@ -56,11 +57,11 @@ class Email:
                 original = parser.parse(assignment_manager.get_due_date(assignment_id=assignment_id))
                 extended = original + datetime.timedelta(days=int(num_days))
 
-                body += f"**{name}**" + "\n"
-                body += f"*Original Deadline:* {fmt_date(original)}" + "\n"
-                body += f"*Extended Deadline:* {fmt_date(extended)}" + "\n"
-                body += f"*Num Days Extended:* {num_days} days" + "\n"
-                body += "---" + "\n"
+                body += f"**{name}**" + "<br>"
+                body += f"*Original Deadline:* {fmt_date(original)}" + "<br>"
+                body += f"*Extended Deadline:* {fmt_date(extended)}" + "<br>"
+                body += f"*Num Days Extended:* {num_days} days" + "<br>"
+                body += "\n\n"
 
         body += "\n"
         comments = student.get_email_comments()
@@ -102,7 +103,7 @@ class Email:
             html_content=html_body,
         )
         if self.cc_emails:
-            message.add_cc(self.cc_emails)
+            message.add_cc([Cc(e, e) for e in self.cc_emails])
         if self.reply_to:
             message.reply_to = self.reply_to
 
