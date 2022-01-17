@@ -37,7 +37,7 @@ About how long do you think you will have issues? When are you free to chat with
 
 All form data is piped into a standard "Form Responses" sheet that looks like the following:
 
-![image-20220116202158154](/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116202158154.png)
+![image-20220116202158154](README.assets/image-20220116202158154.png)
 
 **When the form is submitted, an Apps Script trigger executes, and makes a POST Request with form data to the `handle_form_submit` Google Cloud Function endpoint.**
 
@@ -50,7 +50,7 @@ First, the function instantiates a connection to the spreadsheet by authenticati
 
 Then, the function uses [gspread](https://docs.gspread.org/en/latest/), a wrapper around the Google Sheets API, to pull the "student record object" -  a row of the "Roster" tab of the extensions sheet. *This sheet is the ultimate source of truth for everything extensions related.* Here's what it looks like:
 
-![image-20220116203442887](/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116203442887.png)
+![image-20220116203442887](README.assets/image-20220116203442887.png)
 
 Here's the overall flow of the function:
 
@@ -59,21 +59,21 @@ Here's the overall flow of the function:
 2. **It processes the extension request.**
 
    - **If the extension is able to be approved automatically** (e.g. it's an extension request of less than three days), the function updates the `approval_status` column to **Auto-Approved**, sends an email, and updates the `email_status` column to **Auto-Sent**. Then, it sends this to a private Slack channel.
-     ![image-20220116204224782](/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116204224782.png)
+     ![image-20220116204224782](README.assets/image-20220116204224782.png)
 
    - **If the extension requires manual approval** (e.g. it's more than three days), the function updates the `approval_status` column to **Pending** and the `email_status` column to **Pending Approval**. Then, it sends this to a private Slack channel:
-     ![image-20220116204242900](/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116204242900.png)
+     ![image-20220116204242900](README.assets/image-20220116204242900.png)
 
 At this point, if the extension was automatically approved, nothing else needs to happen. The student will receive an email immediately that looks something like the following (please pardon the off-centered text; this is a proof-of-concept.)
 
-![image-20220116204344723](/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116204344723.png)
+![image-20220116204344723](README.assets/image-20220116204344723.png)
 
 **However, if the extension requires manual approval, then a few additional steps occur.** 
 
 1. Staff deliberate on the extension request in a thread.
 
 
-​	<img src="/Users/shomil/Documents/github/school/161/extensions/README.assets/image-20220116204446963.png" alt="image-20220116204446963" style="zoom:30%;" />
+​	<img src="README.assets/image-20220116204446963.png" alt="image-20220116204446963" style="zoom:30%;" />
 
 2. Staff come to an agreement.
    - If approved (or approved with modification) –
