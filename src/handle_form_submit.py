@@ -91,9 +91,13 @@ def handle_form_submit(request_json):
                 + "overwritten by a new request for an extension of {num_days} days"
             )
 
-        # Flag Case #2: The number of requested days is too large.
-        elif num_days > Environment.get_auto_approve_threshold():
+        # Flag Case #2: The number of requested days is too large (non-DSP).
+        elif not submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold():
             needs_human = f"a request of {num_days} days is greater than auto-approve threshold"
+
+        # Flag Case #3: The number of requested days is too large (DSP).
+        elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
+            needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
         # TODO: Add other flag cases here (e.g. total # extensions is >= 6, or something like that...)
 
@@ -109,6 +113,13 @@ def handle_form_submit(request_json):
         # We do the same for the partner, if this assignment has a partner and the submission has a partner.
         if assignment_manager.is_partner_assignment(assignment_id) and submission.has_partner():
             partner.queue_write_back(col_key=assignment_id, col_value=num_days)
+
+        # Aside: if the form submission claims DSP, but the student record isn't marked as DSP, then flag it
+        if submission.claims_dsp() and not student.is_dsp():
+            slack.send_message(
+                "Note: a student claimed DSP status on their extension request but is not marked "
+                + f"as DSP in our roster (student: {student.get_email()}). Please investigate."
+            )
 
     # -----------------------------------------------------------------------------------------------------------------
     # Section 2B: We finished processing all extensions, so let's see what we should set the final "status" column to.

@@ -16,6 +16,10 @@ class Environment:
         return int(Environment.get("AUTO_APPROVE_THRESHOLD"))
 
     @staticmethod
+    def get_auto_approve_threshold_dsp() -> int:
+        return int(Environment.get("AUTO_APPROVE_THRESHOLD_DSP"))
+
+    @staticmethod
     def configure_env_vars(sheet: Sheet):
         """
         Reads environment variables from the "Environment Variables" sheet, and stores them into this process's

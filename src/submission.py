@@ -40,8 +40,12 @@ class FormSubmission:
     def get_email(self) -> str:
         return str(self.responses["email"])
 
-    def is_dsp(self) -> bool:
-        return self.responses["is_dsp"] == "Yes"
+    def dsp_status(self) -> bool:
+        return self.responses["is_dsp"]
+
+    def claims_dsp(self) -> bool:
+        # If their response is "Yes" or some other text, we auto-approve the request for DSP purposes
+        return self.responses["is_dsp"] != "No"
 
     def knows_assignments(self) -> bool:
         return self.responses["knows_assignments"] == "Yes"

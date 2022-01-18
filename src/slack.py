@@ -38,6 +38,9 @@ class SlackManager:
         self.student = student
         self.assignment_manager = assignment_manager
 
+    def send_message(self, message: str) -> None:
+        self.webhook.send(text=message)
+
     def send_student_update(self, message: str, autoapprove: bool = False) -> None:
         message += "\n"
         if self.submission.knows_assignments():
