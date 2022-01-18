@@ -50,7 +50,7 @@ First, the function instantiates a connection to the spreadsheet by authenticati
 
 Then, the function uses [gspread](https://docs.gspread.org/en/latest/), a wrapper around the Google Sheets API, to pull the "student record object" -  a row of the "Roster" tab of the extensions sheet. *This sheet is the ultimate source of truth for everything extensions related.* Here's what it looks like:
 
-![image-20220116203442887](README.assets/image-20220116203442887.png)
+![image-20220117212556024](README.assets/image-20220117212556024.png)
 
 Here's the overall flow of the function:
 
@@ -95,17 +95,21 @@ At this point, if the extension was automatically approved, nothing else needs t
 
 ### Handling Failures
 
-- Extensive data validation and error checking is done throughout the codebase (or, at least, will be done when this project is deployed to production.)
+- Extensive data validation and error checking is done throughout the codebase, especially for internal errors (e.g. configuration variables not set) or user errors (e.g. data formatting is incorrect, spreadsheets are missing, etc.).
 - If an action fails halfway through a transaction, then the email is not sent and staff are paged on Slack for manual intervention.
-  - "Manual Intervention" may involve manually looking at form responses and translating them into the roster.
-  - If the number of failures is quite large (e.g. multiple form responses were not processed), it's possible to write a script to batch "resubmit the form" on behalf of students, which will trigger new function invocations automatically (e.g. after a bug has been fixed).
+  - The page contains an error message, as seen below.
+    ![image-20220117212706293](README.assets/image-20220117212706293.png)
+  - From here, staff can choose to handle this in two ways:
+    - Make the modifications to the form submission in the "Form Responses" sheet, and then use an Apps Script dropdown menu to "rerun" select form submissions through the backend. 
+    - Make the modifications to the roster directly by looking over the form response manually, and then sending emails manually, or through the email queue feature noted above.
+  - If a whole bunch of submissions fail (e.g. say, overnight) due to an internal issue, then the submissions at failure-time and onwards can all be selected and batch-reprocessed once the bug has been patched (so there shouldn't ever be a case where we'd have to manually process hundreds of submissions).
 
 ---
 
 ### Design Philosophy
 
 - Avoid writing frontend code at all costs.
-- Use Google Sheets as a frontend, and nothing else. Do no data manipulation in Sheets; handle all data manipulation in Python.
-- Minimize Apps Script usage to the bare minimum. JavaScript is bug-prone; it's easier to raise and handle errors in Python.
+- Use Google Sheets as a frontend, and nothing else. Do no data manipulation in Sheets; handle all data manipulation in Python. Spreadsheets have a large learning curve, and formulas are hard to write, debug, and extend beyond the raw data itself (e.g. Slack integration, state management decisions, etc.). 
+- Minimize Apps Script usage. JavaScript is bug-prone and also requires a larger learning curve than Python; it's easier to raise and diagnose errors if 95% of the code is in Python.
 - Avoid deploying servers. Use serverless wherever possible (e.g. cloud functions, instead of Flask apps).
 
