@@ -29,6 +29,12 @@ class StudentRecord:
         self.sheet = sheet
         self.write_queue = []
 
+    def has_wip_status(self):
+        return (
+            self.approval_status() == APPROVAL_STATUS_REQUESTED_MEETING
+            or self.approval_status() == APPROVAL_STATUS_PENDING
+        )
+
     def get_name(self):
         return self.table_record["name"]
 
@@ -53,14 +59,26 @@ class StudentRecord:
     def approval_status(self):
         return self.table_record["approval_status"]
 
-    def queue_approval_status(self, status: str):
-        self.queue_write_back(col_key="approval_status", col_value=status)
-
     def email_status(self):
         return self.table_record["email_status"]
 
-    def queue_email_status(self, status: str):
+    def _queue_approval_status(self, status: str):
+        self.queue_write_back(col_key="approval_status", col_value=status)
+
+    def _queue_email_status(self, status: str):
         self.queue_write_back(col_key="email_status", col_value=status)
+
+    def set_status_requested_meeting(self):
+        self._queue_approval_status(APPROVAL_STATUS_REQUESTED_MEETING)
+        self._queue_email_status("")
+
+    def set_status_pending(self):
+        self._queue_approval_status(APPROVAL_STATUS_PENDING)
+        self._queue_email_status(EMAIL_STATUS_PENDING)
+
+    def set_status_approved(self):
+        self._queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
+        self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
 
     def existing_request_count(self, assignment_manager: AssignmentManager) -> Optional[int]:
         count = 0
