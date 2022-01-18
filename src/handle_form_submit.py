@@ -23,7 +23,7 @@ from src.sheets import (
 )
 
 # TODO: What about retroactive extensions?
-# TODO: What about partners?
+
 
 def handle_form_submit(request_json):
     if "spreadsheet_url" not in request_json or "form_data" not in request_json:
@@ -46,10 +46,7 @@ def handle_form_submit(request_json):
     submission = FormSubmission(form_payload=request_json["form_data"], question_sheet=sheet_form_questions)
 
     # Extract this student's record.
-    query_result = sheet_records.get_record_by_id(id_column="sid", id_value=submission.get_sid())
-    if not query_result:
-        raise FormInputError(f"This student's SID was not found (sid: {submission.get_sid()}).")
-    student = StudentRecord(table_index=query_result[0], table_record=query_result[1], sheet=sheet_records)
+    student = StudentRecord.from_sid(sid=submission.get_sid(), sheet_records=sheet_records)
 
     # Get a pointer to Slack, and set the current student
     slack = SlackManager()
@@ -61,7 +58,13 @@ def handle_form_submit(request_json):
     # num_existing_requests = student.existing_request_count()
 
     if submission.knows_assignments():
-        print("Student requested extension for specific assignments. Processing each one...")
+        print("Student requested extension for specific assignments.")
+        print("Checking for partner...")
+        if submission.has_partner():
+            print("Attempting to look up partner by SID.")
+            partner = StudentRecord.from_sid(sid=submission.get_partner_sid(), sheet_records=sheet_records)
+        else:
+            partner = None
 
         # Walk through all of this student's form-provided extension requests. If any of them trigger a manual approval,
         # then the entire record becomes flagged for manual approval. If the student has already been flagged for
@@ -80,46 +83,96 @@ def handle_form_submit(request_json):
                 needs_human = True
             else:
                 print(f"[{assignment_id}] Request meets criteria for auto-approval.")
-                
+
             student.queue_write_back(col_key=assignment_id, col_value=num_days)
 
-        # And finally: the conclusion. Figure out what to set the status to, and send corresponding Slack/emails.
-        if student.approval_status() == APPROVAL_STATUS_REQUESTED_MEETING:
-            # Student has a pending meeting request, so not updating approval.
-            student.dispatch_writes()
-            slack.send_student_update("*[Action Required]* A student with a pending support meeting submitted an extension request, so the request could not be approved automatically!")
+            # Queue up the extension of num_days for the partner as well.
+            if assignment_manager.is_partner_assignment(assignment_id) and submission.has_partner():
+                partner.queue_write_back(col_key=assignment_id, col_value=num_days)
 
-        elif student.approval_status() == APPROVAL_STATUS_PENDING:
-            # Student has a pending extension request, so not auto-approving even if this request is approvable.
+        # And finally: the conclusion. Figure out what to set the status to, and send corresponding Slack/emails.
+        if (
+            student.approval_status() == APPROVAL_STATUS_REQUESTED_MEETING
+            or student.approval_status() == APPROVAL_STATUS_PENDING
+        ):
+            # Student has a pending extension or meeting request, so not updating approval.
+
+            # For student: write back only num_day updates.
             student.dispatch_writes()
-            slack.send_student_update("*[Action Required]* A student with pending extension requests submitted another extension request, so the request could not be approved automatically!")
+
+            # For partner: write back new statuses (PENDING) and num_day updates.
+            if partner:
+                partner.queue_approval_status(APPROVAL_STATUS_PENDING)
+                partner.queue_email_status(EMAIL_STATUS_PENDING)
+                partner.dispatch_writes()
+
+            slack.send_student_update(
+                "An extension request could not be auto-approved (existing request in progress). Details:"
+            )
+
+        elif submission.has_partner() and (
+            partner.approval_status() == APPROVAL_STATUS_REQUESTED_MEETING
+            or partner.approval_status() == APPROVAL_STATUS_PENDING
+        ):
+            # Partner has a pending extension or meeting request, so not updating approval.
+
+            # For partner: write back only num_day updates.
+            partner.dispatch_writes()
+
+            # For student: write back new statuses (PENDING) and num_day updates.
+            student.queue_approval_status(APPROVAL_STATUS_PENDING)
+            student.queue_email_status(EMAIL_STATUS_PENDING)
+            student.dispatch_writes()
+
+            slack.send_student_update(
+                "An extension request could not be auto-approved (blocked by an existing request in progress for the student's partner). Details:"
+            )
 
         else:
             if needs_human:
                 # Don't auto-approve the request
-                student.queue_approval_status(APPROVAL_STATUS_PENDING)
-                student.queue_email_status(EMAIL_STATUS_PENDING)
-                student.dispatch_writes()
-                slack.send_student_update("*[Action Required]* An extension request could not be auto-approved!")
+                def apply(user: StudentRecord):
+                    user.queue_approval_status(APPROVAL_STATUS_PENDING)
+                    user.queue_email_status(EMAIL_STATUS_PENDING)
+                    user.dispatch_writes()
+
+                apply(student)
+                if partner:
+                    apply(partner)
+
+                slack.send_student_update(
+                    "An extension request could not be auto-approved (failed to meet the approval criteria). Details:"
+                )
 
             else:
-                # Auto-approve the request
-                student.queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
-                student.queue_email_status(EMAIL_STATUS_AUTO_SENT)
+                # Auto-approve the request, and send out emails.
+                # If the student has a partner, auto-approve for them as well and send out emails for them.
 
-                student.dispatch_writes()
+                def apply(user: StudentRecord):
+                    user.queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
+                    user.queue_email_status(EMAIL_STATUS_AUTO_SENT)
+                    user.dispatch_writes()
 
-                # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
-                try:
-                    email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
-                    email.send()
-                except Exception as err:
-                    raise KnownError(
-                        "Writes to spreadsheet succeed, but email to student failed.\n"
-                        + "Please follow up with this student manually and/or check SendGrid logs.\n"
-                        + "Error: "
-                        + str(err)
-                    )
+                def send_email(user: StudentRecord):
+                    # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
+                    try:
+                        email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
+                        email.send()
+                    except Exception as err:
+                        raise KnownError(
+                            "Writes to spreadsheet succeed, but email to student failed.\n"
+                            + "Please follow up with this student manually and/or check SendGrid logs.\n"
+                            + "Error: "
+                            + str(err)
+                        )
+
+                apply(student)
+                send_email(student)
+
+                if partner:
+                    apply(partner)
+                    send_email(partner)
+
                 slack.send_student_update("An extension request was automatically approved!", autoapprove=True)
 
     else:

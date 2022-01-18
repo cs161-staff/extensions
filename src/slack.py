@@ -80,5 +80,4 @@ class SlackManager:
             raise SlackError(f"Status code not 200: {vars(response)}")
 
     def send_error(self, error: str) -> None:
-        print(error)
-        pass
+        self.webhook.send(text="An error occurred: " + '\n' + '```' + '\n' + error + '\n' + '```')

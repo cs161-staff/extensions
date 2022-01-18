@@ -68,6 +68,9 @@ class FormSubmission:
             for name, days in zip(names, days):
                 assignment_id = assignment_manager.name_to_id(name)
                 num_days = int(days)
+                if num_days <= 0:
+                    raise FormInputError("# requested days must be > 0")
+                    
                 requests[assignment_id] = num_days
 
             return requests

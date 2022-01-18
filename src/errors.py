@@ -21,5 +21,6 @@ class ConfigurationError(KnownError):
 class FormInputError(KnownError):
     pass
 
+
 class EmailError(KnownError):
     pass

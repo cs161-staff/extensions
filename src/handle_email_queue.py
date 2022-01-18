@@ -21,7 +21,6 @@ def handle_email_queue(request_json):
     base = BaseSpreadsheet(spreadsheet_url=request_json["spreadsheet_url"])
     sheet_assignments = base.get_sheet(SHEET_ASSIGNMENTS)
     sheet_records = base.get_sheet(SHEET_STUDENT_RECORDS)
-    sheet_form_questions = base.get_sheet(SHEET_FORM_QUESTIONS)
     sheet_env_vars = base.get_sheet(SHEET_ENVIRONMENT_VARIABLES)
 
     # Set up environment variables.

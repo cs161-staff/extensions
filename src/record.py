@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from typing import Any, Dict, Optional
 from src.assignments import AssignmentManager
 
-from src.errors import StudentRecordError
+from src.errors import FormInputError, StudentRecordError
 from src.sheets import Sheet
 
 APPROVAL_STATUS_REQUESTED_MEETING = "Requested Meeting"
@@ -99,3 +101,10 @@ class StudentRecord:
             # once writes are dispatched to backend, update the local object as well (this is so that it shows
             # up in the email that's generated)
             self.table_record[col_key] = value
+
+    @staticmethod
+    def from_sid(sid: str, sheet_records: Sheet) -> StudentRecord:
+        query_result = sheet_records.get_record_by_id(id_column="sid", id_value=sid)
+        if not query_result:
+            raise FormInputError(f"This student's SID was not found (sid: {sid}).")
+        return StudentRecord(table_index=query_result[0], table_record=query_result[1], sheet=sheet_records)

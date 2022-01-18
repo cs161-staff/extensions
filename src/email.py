@@ -37,8 +37,6 @@ class Email:
 
     @staticmethod
     def from_student_record(student: StudentRecord, assignment_manager: AssignmentManager) -> Email:
-        # TODO: Move this to the StudentRecord class.
-
         body = f"Hi {student.get_name()},"
         body += "\n\n"
         body += (
