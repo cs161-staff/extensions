@@ -65,6 +65,11 @@ class FormSubmission:
             names = clean(self.responses["assignments"].split(","))
             days = clean(str(self.responses["days"]).split(","))
 
+            # A little logic to help with the case where a student selects P1, P1 Checkpoint and asks for "7" days
+            # Apply "7" to both P1 and P1 checkpoint
+            if len(days) == 1 and len(names) > 1:
+                days = [days[0] for _ in range(len(names))]
+
             if len(names) != len(days):
                 raise FormInputError("# assignment names provided does not equal # days requested for each assignment.")
 

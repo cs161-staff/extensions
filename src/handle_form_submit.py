@@ -83,19 +83,20 @@ def handle_form_submit(request_json):
     for assignment_id, num_days in submission.get_requests(assignment_manager=assignment_manager).items():
         print(f"[{assignment_id}] Processing request for {num_days} days.")
 
-        # Flag Case 1: The student has an existing request for this particular assignment.
+        # If student requests new extension that's shorter than previously requested extension, then treat this request
+        # as the previously requested extension (this helps us with the case where Partner A requests 8 day ext. and B
+        # requests 3 day ext.) In all other cases (e.g. if new request is longer than old one), we treat it as a normal
+        # request and overwrite the existing record.
         existing_request = student.get_assignment(assignment_id=assignment_id)
-        if existing_request:
-            needs_human = (
-                f"for `{assignment_id}`, an existing request of {existing_request} days was "
-                + "overwritten by a new request for an extension of {num_days} days"
-            )
+        if existing_request and num_days <= existing_request:
+            slack.add_warning(f'[{assignment_id}] Student requested an extension for {num_days} days, which was <= an existing request of {existing_request} days, so we kept the existing request in-place.')
+            num_days = existing_request
 
-        # Flag Case #2: The number of requested days is too large (non-DSP).
-        elif not submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold():
+        # Flag Case #1: The number of requested days is too large (non-DSP).
+        if not submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold():
             needs_human = f"a request of {num_days} days is greater than auto-approve threshold"
 
-        # Flag Case #3: The number of requested days is too large (DSP).
+        # Flag Case #2: The number of requested days is too large (DSP).
         elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
             needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
@@ -116,9 +117,10 @@ def handle_form_submit(request_json):
 
         # Aside: if the form submission claims DSP, but the student record isn't marked as DSP, then flag it
         if submission.claims_dsp() and not student.is_dsp():
-            slack.send_message(
-                "Note: a student claimed DSP status on their extension request but is not marked "
-                + f"as DSP in our roster (student: {student.get_email()}). Please investigate."
+            slack.add_warning(
+                f"Student {submission.get_email()} responded '{submission.dsp_status()}' to "
+                + "DSP question in extension request, but is not marked for DSP approval on the roster. "
+                + "Please investigate!"
             )
 
     # -----------------------------------------------------------------------------------------------------------------
@@ -135,8 +137,7 @@ def handle_form_submit(request_json):
         partner.set_status_pending()
         partner.dispatch_writes()
         slack.send_student_update(
-            "An extension request could not be auto-approved (existing request in progress). "
-            + "Updated status for partner, but left student status as is. "
+            "An extension request could not be auto-approved (there is work-in-progress for this student's record). "
             + "Details:"
         )
 
@@ -148,8 +149,7 @@ def handle_form_submit(request_json):
         student.dispatch_writes()
 
         slack.send_student_update(
-            "An extension request could not be auto-approved. "
-            + "Updated status for student, but left partner status as is. "
+            "An extension request could not be auto-approved (there is work-in-progress for this student's partner). "
             + "Details:"
         )
 
@@ -158,7 +158,9 @@ def handle_form_submit(request_json):
     # it as such). But we do want to update the roster with the number of days requested, so we dispatch writes.
     elif student.has_wip_status():
         student.dispatch_writes()
-        slack.send_student_update("An extension request could not be auto-approved. Details:")
+        slack.send_student_update(
+            "An extension request could not be auto-approved (there is work in progress for this student). Details:"
+        )
 
     # Case (4): Student's status (and, if applicable, partner's status) are "clean" - there is no pending
     # activity in either of these rows, so we can go ahead and check if the extension as a whole qualifies
@@ -171,7 +173,7 @@ def handle_form_submit(request_json):
             partner.set_status_pending()
             partner.dispatch_writes()
 
-        slack.send_student_update(f"An extension request could not be auto-approved ({needs_human}). Details:")
+        slack.send_student_update(f"An extension request could not be auto-approved (reason: {needs_human}). Details:")
 
     # Case (5): Student's status (and, if applicable, partner's status) are "clean" - and the extension as a whole
     # qualifies for an auto-extension! So we can go ahead and process the extension for the student and the partner.

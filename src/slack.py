@@ -15,6 +15,10 @@ class SlackManager:
 
     def __init__(self) -> None:
         self.webhook = WebhookClient(Environment.get("SLACK_ENDPOINT"))
+        self.warnings = []
+
+    def add_warning(self, warning: str):
+        self.warnings.append(warning)
 
     def _get_submission_details_knows_assignments(self):
         text = "> *Email*: " + self.submission.get_email() + "\n"
@@ -59,6 +63,15 @@ class SlackManager:
         message += "```"
         message += tabulate(rows, headers=headers)
         message += "```"
+        message += '\n'
+        message += '\n'
+        if len(self.warnings) > 0:
+            message += '*Warnings:*\n'
+            message += '```' + '\n'
+            for w in self.warnings:
+                message += w + '\n'
+            message += '```'
+        
 
         if autoapprove:
             response = self.webhook.send(text=message)
