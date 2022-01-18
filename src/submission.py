@@ -18,8 +18,10 @@ class FormSubmission:
         "Form Questions" spreadsheet to allow us to rename form questions without impacting the underlying
         data pointers.
         """
-        self.responses = {}
+        print(form_payload)
 
+        self.responses = {}
+        
         for row in question_sheet.get_all_records():
             question = row.get("question")
             if not question:
@@ -28,7 +30,9 @@ class FormSubmission:
             if not key:
                 raise ConfigurationError(f"The Form Question sheet is missing a key for question: {question}")
             if question in form_payload:
-                self.responses[key] = form_payload[question][0]
+                self.responses[key] = str(form_payload[question][0])
+
+        print(self.responses)
 
     def get_sid(self) -> str:
         return str(self.responses["sid"])
@@ -55,7 +59,7 @@ class FormSubmission:
         try:
             clean = lambda arr: [str(x).strip() for x in arr]
             names = clean(self.responses["assignments"].split(","))
-            days = clean(self.responses["days"].split(","))
+            days = clean(str(self.responses["days"]).split(","))
 
             if len(names) != len(days):
                 raise FormInputError("# assignment names provided does not equal # days requested for each assignment.")

@@ -1,3 +1,4 @@
+from enum import auto
 from src import submission
 from src.assignments import AssignmentManager
 from src.email import Email
@@ -54,20 +55,13 @@ def handle_form_submit(request_json):
     slack = SlackManager()
     slack.set_current_student(submission=submission, student=student, assignment_manager=assignment_manager)
 
-    # Core logic goes here.
-    log_records = []
-
-    def log(msg: str):
-        print(msg)
-        log_records.append(msg)
-
     needs_human = False
 
     # TODO: Configure this into the auto-approve logic as desired.
     # num_existing_requests = student.existing_request_count()
 
     if submission.knows_assignments():
-        log("Student requested extension for specific assignments. Processing each one...")
+        print("Student requested extension for specific assignments. Processing each one...")
 
         # Walk through all of this student's form-provided extension requests. If any of them trigger a manual approval,
         # then the entire record becomes flagged for manual approval. If the student has already been flagged for
@@ -75,17 +69,17 @@ def handle_form_submit(request_json):
         # false do we trigger an "auto-approval" - and it's in this last case that the student automatically recieves
         # an email.
         for assignment_id, num_days in submission.get_requests(assignment_manager=assignment_manager).items():
-            log(f"[{assignment_id}] Processing request for {num_days} days.")
+            print(f"[{assignment_id}] Processing request for {num_days} days.")
 
             existing_request = student.get_assignment(assignment_id=assignment_id)
             if existing_request:
-                log(f"[{assignment_id}] Request already exists for {existing_request} days. Needs manual approval.")
+                print(f"[{assignment_id}] Request already exists for {existing_request} days. Needs manual approval.")
                 needs_human = True
             elif num_days > Environment.get_auto_approve_threshold():
-                log(f"[{assignment_id}] Request is > auto-approve threshold. Needs manual approval.")
+                print(f"[{assignment_id}] Request is > auto-approve threshold. Needs manual approval.")
                 needs_human = True
             else:
-                log(f"[{assignment_id}] Request meets criteria for auto-approval.")
+                print(f"[{assignment_id}] Request meets criteria for auto-approval.")
                 
             student.queue_write_back(col_key=assignment_id, col_value=num_days)
 
@@ -126,10 +120,10 @@ def handle_form_submit(request_json):
                         + "Error: "
                         + str(err)
                     )
-                slack.send_student_update("An extension request was automatically approved!")
+                slack.send_student_update("An extension request was automatically approved!", autoapprove=True)
 
     else:
-        log("Student requested general extension without specific assignments...")
+        print("Student requested general extension without specific assignments...")
         student.queue_approval_status(APPROVAL_STATUS_REQUESTED_MEETING)
         student.dispatch_writes()
         slack.send_student_update("*[Action Required]* A student requested a student support meeting.")

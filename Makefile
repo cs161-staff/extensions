@@ -6,4 +6,6 @@ deploy-form-submit:
 deploy-email-queue:
 	gcloud config configurations activate cs161
 	gcloud config set project cs-161-extensions
-	gcloud functions deploy process_email_queue --trigger-http --runtime python39
+	gcloud functions deploy handle_email_queue --trigger-http --runtime python39
+
+all: deploy-email-queue deploy-form-submit

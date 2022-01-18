@@ -14,4 +14,10 @@
 .gitignore
 
 node_modules
-#!include:.gitignore
+README.assets
+
+*.pyc
+core/__pycache__/*
+extensions/
+.DS_Store
+
