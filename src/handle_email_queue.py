@@ -56,7 +56,7 @@ def handle_email_queue(request_json):
 
     slack = SlackManager()
     if len(emails) == 0:
-        slack.send_message('Sent zero emails from the queue...was it empty?')
+        slack.send_message("Sent zero emails from the queue...was it empty?")
     else:
         slack.send_message(
             f"Sent {sent_count} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"

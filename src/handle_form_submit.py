@@ -52,6 +52,10 @@ def handle_form_submit(request_json):
     # Extract this student's record.
     student = StudentRecord.from_sid(sid=submission.get_sid(), sheet_records=sheet_records)
 
+    # Quick check.
+    if student.get_email() != submission.get_email() or student.get_sid() != submission.get_sid():
+        raise FormInputError("Invalid SID/email combo provided for this submission!")
+
     # Get a pointer to Slack, and set the current student
     slack = SlackManager()
     slack.set_current_student(submission=submission, student=student, assignment_manager=assignment_manager)
@@ -79,6 +83,10 @@ def handle_form_submit(request_json):
     if submission.has_partner():
         print("Attempting to look up partner by SID.")
         partner = StudentRecord.from_sid(sid=submission.get_partner_sid(), sheet_records=sheet_records)
+
+        # Quick check
+        if partner.get_email() != submission.get_partner_email():
+            raise FormInputError("Partner email/SID combo mismatch.")
 
     num_requests = len(submission.get_requests(assignment_manager=assignment_manager))
 
