@@ -75,9 +75,7 @@ class Email:
         return Email(
             to_emails=[student.get_email()],
             from_email=Environment.get("EMAIL_FROM"),
-            cc_emails=Environment.get(
-                "EMAIL_CC",
-            ).split(","),
+            cc_emails=[e.strip() for e in Environment.get("EMAIL_CC").split(",")],
             reply_to=Environment.get("EMAIL_REPLY_TO"),
             subject=Environment.get("EMAIL_SUBJECT"),
             body=body,

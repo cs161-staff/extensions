@@ -32,4 +32,4 @@ def rerun_records():
 
 
 if __name__ == "__main__":
-    rerun_records()
+    test_email()
