@@ -10,11 +10,13 @@ from src.sheets import Sheet
 
 import gspread
 
+def test_email():
+    handle_email_queue({
+        "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1MsGh1OFPltaoXGF8kv0e-O9WAFoaxcbFA6HVM7AbFOQ/edit?resourcekey#gid=790260459",
+    })
+
 def test():
     handle_form_submit(json.load(open("test_data/knows_assignments.json")))
-    # handle_email_queue({
-    #     "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1MsGh1OFPltaoXGF8kv0e-O9WAFoaxcbFA6HVM7AbFOQ/edit?resourcekey#gid=790260459",
-    # })
 
 def rerun_records():
     spreadsheet_url = "https://docs.google.com/spreadsheets/d/1MsGh1OFPltaoXGF8kv0e-O9WAFoaxcbFA6HVM7AbFOQ/edit?resourcekey#gid=790260459"
@@ -30,4 +32,4 @@ def rerun_records():
 
 
 if __name__ == "__main__":
-    rerun_records()
+    test_email()

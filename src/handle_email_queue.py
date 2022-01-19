@@ -9,6 +9,7 @@ from src.sheets import (
     SHEET_STUDENT_RECORDS,
     BaseSpreadsheet,
 )
+from src.slack import SlackManager
 
 from src.utils import Environment
 
@@ -30,6 +31,7 @@ def handle_email_queue(request_json):
     assignment_manager = AssignmentManager(sheet=sheet_assignments)
 
     # Fetch all students.
+    sent_count = 0
     for i, table_record in enumerate(sheet_records.get_all_records()):
         student = StudentRecord(table_index=i, table_record=table_record, sheet=sheet_records)
         if student.email_status() == EMAIL_STATUS_IN_QUEUE:
@@ -37,8 +39,9 @@ def handle_email_queue(request_json):
             try:
                 email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
                 email.send()
-                student.queue_email_status(EMAIL_STATUS_AUTO_SENT)
+                student.set_status_email_approved()
                 student.dispatch_writes()
+                sent_count += 1
             except Exception as err:
                 raise KnownError(
                     f"Attempted to send an email to {student.get_email()}, but failed.\n"
@@ -47,3 +50,6 @@ def handle_email_queue(request_json):
                     + "Error: "
                     + str(err)
                 )
+
+    slack = SlackManager()
+    slack.send_message(f'Sent {sent_count} emails from the queue.')

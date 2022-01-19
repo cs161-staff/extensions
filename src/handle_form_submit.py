@@ -80,6 +80,8 @@ def handle_form_submit(request_json):
         print("Attempting to look up partner by SID.")
         partner = StudentRecord.from_sid(sid=submission.get_partner_sid(), sheet_records=sheet_records)
 
+    num_requests = len(submission.get_requests(assignment_manager=assignment_manager))
+
     for assignment_id, num_days in submission.get_requests(assignment_manager=assignment_manager).items():
         print(f"[{assignment_id}] Processing request for {num_days} days.")
 
@@ -89,7 +91,9 @@ def handle_form_submit(request_json):
         # request and overwrite the existing record.
         existing_request = student.get_assignment(assignment_id=assignment_id)
         if existing_request and num_days <= existing_request:
-            slack.add_warning(f'[{assignment_id}] Student requested an extension for {num_days} days, which was <= an existing request of {existing_request} days, so we kept the existing request in-place.')
+            slack.add_warning(
+                f"[{assignment_id}] Student requested an extension for {num_days} days, which was <= an existing request of {existing_request} days, so we kept the existing request in-place."
+            )
             num_days = existing_request
 
         # Flag Case #1: The number of requested days is too large (non-DSP).
@@ -97,10 +101,12 @@ def handle_form_submit(request_json):
             needs_human = f"a request of {num_days} days is greater than auto-approve threshold"
 
         # Flag Case #2: The number of requested days is too large (DSP).
-        elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
+        if submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
             needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
         # TODO: Add other flag cases here (e.g. total # extensions is >= 6, or something like that...)
+        if not submission.claims_dsp() and num_requests > Environment.get("AUTO_APPROVE_ASSIGNMENT_THRESHOLD"):
+            needs_human = f"student requested too many assignment extensions ({num_requests}) in one form submission"
 
         # Passed all cases, so proceed.
         else:

@@ -76,6 +76,9 @@ class StudentRecord:
         self._queue_approval_status(APPROVAL_STATUS_PENDING)
         self._queue_email_status(EMAIL_STATUS_PENDING)
 
+    def set_status_email_approved(self):
+        self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
+
     def set_status_approved(self):
         self._queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
         self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
