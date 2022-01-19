@@ -43,8 +43,10 @@ class SlackManager:
         self.assignment_manager = assignment_manager
 
     def send_message(self, message: str) -> None:
-        self.webhook.send(text=message)
-
+        response = self.webhook.send(text=message)
+        if response.status_code != 200:
+            raise SlackError(f"Status code not 200: {vars(response)}")
+            
     def send_student_update(self, message: str, autoapprove: bool = False) -> None:
         message += "\n"
         if self.submission.knows_assignments():

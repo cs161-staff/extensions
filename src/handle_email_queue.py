@@ -32,12 +32,15 @@ def handle_email_queue(request_json):
 
     # Fetch all students.
     sent_count = 0
+    emails = []
+
     for i, table_record in enumerate(sheet_records.get_all_records()):
         student = StudentRecord(table_index=i, table_record=table_record, sheet=sheet_records)
         if student.email_status() == EMAIL_STATUS_IN_QUEUE:
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
                 email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
+                emails.append(student.get_email())
                 email.send()
                 student.set_status_email_approved()
                 student.dispatch_writes()
@@ -52,4 +55,9 @@ def handle_email_queue(request_json):
                 )
 
     slack = SlackManager()
-    slack.send_message(f'Sent {sent_count} emails from the queue.')
+    if len(emails) == 0:
+        slack.send_message('Sent zero emails from the queue...was it empty?')
+    else:
+        slack.send_message(
+            f"Sent {sent_count} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"
+        )
