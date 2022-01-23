@@ -66,9 +66,9 @@ Here's the overall flow of the function:
 
 ---
 
-At this point, if the extension was automatically approved, nothing else needs to happen. The student will receive an email immediately that looks something like the following (please pardon the off-centered text; this is a proof-of-concept.)
+At this point, if the extension was automatically approved, nothing else needs to happen. The student will receive an email immediately that looks something like the following.
 
-![image-20220116204344723](README.assets/image-20220116204344723.png)
+![image-20220122201503145](README.assets/image-20220122201503145.png)
 
 ---
 
