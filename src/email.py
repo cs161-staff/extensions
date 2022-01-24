@@ -71,6 +71,8 @@ class Email:
         body += "Best,"
         body += "\n\n"
         body += Environment.get("EMAIL_SIGNATURE")
+        body += "\n\n"
+        body += "*Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in this thread, and feel free to reply to this thread if you'd like to follow up with us!*"
 
         return Email(
             to_emails=[student.get_email()],
