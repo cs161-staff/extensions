@@ -25,7 +25,7 @@ class FormSubmission:
         for row in question_sheet.get_all_records():
             question = row.get("question")
             if not question:
-                raise ConfigurationError("The Form Question sheet is missing a 'question' column.")
+                continue
             key = row.get("key")
             if not key:
                 raise ConfigurationError(f"The Form Question sheet is missing a key for question: {question}")

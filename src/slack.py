@@ -1,7 +1,8 @@
+from typing import List
 from src.assignments import AssignmentManager
 from src.record import StudentRecord
 from src.submission import FormSubmission
-from slack_sdk.webhook import WebhookClient
+from slack_sdk.webhook import WebhookClient, WebhookResponse
 
 from src.errors import SlackError
 from src.utils import Environment
@@ -14,8 +15,13 @@ class SlackManager:
     """
 
     def __init__(self) -> None:
-        self.webhook = WebhookClient(Environment.get("SLACK_ENDPOINT"))
+        self.webhooks: List[WebhookClient] = []
+        self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT")))
         self.warnings = []
+
+        if Environment.contains("SLACK_ENDPOINT_DEBUG"):
+            if Environment.get("SLACK_ENDPOINT_DEBUG") != Environment.get('SLACK_ENDPOINT'):
+                self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT_DEBUG")))
 
     def add_warning(self, warning: str):
         self.warnings.append(warning)
@@ -43,10 +49,10 @@ class SlackManager:
         self.assignment_manager = assignment_manager
 
     def send_message(self, message: str) -> None:
-        response = self.webhook.send(text=message)
-        if response.status_code != 200:
-            raise SlackError(f"Status code not 200: {vars(response)}")
-            
+        for webhook in self.webhooks:
+            response = webhook.send(text=message)
+            self.check_error(response)
+
     def send_student_update(self, message: str, autoapprove: bool = False) -> None:
         message += "\n"
         if self.submission.knows_assignments():
@@ -65,37 +71,43 @@ class SlackManager:
         message += "```"
         message += tabulate(rows, headers=headers)
         message += "```"
-        message += '\n'
-        message += '\n'
+        message += "\n"
+        message += "\n"
         if len(self.warnings) > 0:
-            message += '*Warnings:*\n'
-            message += '```' + '\n'
+            message += "*Warnings:*\n"
+            message += "```" + "\n"
             for w in self.warnings:
-                message += w + '\n'
-            message += '```'
-        
+                message += w + "\n"
+            message += "```"
 
         if autoapprove:
-            response = self.webhook.send(text=message)
+            for webhook in self.webhooks:
+                response = webhook.send(text=message)
+                self.check_error(response)
         else:
-            response = self.webhook.send(
-                blocks=[
-                    {"type": "section", "text": {"type": "mrkdwn", "text": message}},
-                    {
-                        "type": "actions",
-                        "block_id": "approve_extension",
-                        "elements": [
-                            {
-                                "type": "button",
-                                "text": {"type": "plain_text", "text": "View Spreadsheet"},
-                                "url": Environment.get('SPREADSHEET_URL'),
-                            },
-                        ],
-                    },
-                ]
-            )
-        if response.status_code != 200:
-            raise SlackError(f"Status code not 200: {vars(response)}")
+            for webhook in self.webhooks:
+                response = webhook.send(
+                    blocks=[
+                        {"type": "section", "text": {"type": "mrkdwn", "text": message}},
+                        {
+                            "type": "actions",
+                            "block_id": "approve_extension",
+                            "elements": [
+                                {
+                                    "type": "button",
+                                    "text": {"type": "plain_text", "text": "View Spreadsheet"},
+                                    "url": Environment.get("SPREADSHEET_URL"),
+                                },
+                            ],
+                        },
+                    ]
+                )
+                self.check_error(response)
 
     def send_error(self, error: str) -> None:
-        self.webhook.send(text="An error occurred: " + '\n' + '```' + '\n' + error + '\n' + '```')
+        for webhook in self.webhooks:
+            webhook.send(text="An error occurred: " + "\n" + "```" + "\n" + error + "\n" + "```")
+
+    def check_error(self, response: WebhookResponse):
+        if response.status_code != 200:
+            raise SlackError(f"Status code not 200: {vars(response)}")

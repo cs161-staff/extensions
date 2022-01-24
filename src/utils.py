@@ -5,6 +5,11 @@ from src.sheets import Sheet
 
 
 class Environment:
+
+    @staticmethod
+    def contains(key: str) -> bool:
+        return os.getenv(key) is not None and str(os.getenv(key)).strip() != ""
+
     @staticmethod
     def get(key: str) -> Any:
         if not os.getenv(key):

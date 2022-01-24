@@ -109,11 +109,11 @@ def handle_form_submit(request_json):
             needs_human = f"a request of {num_days} days is greater than auto-approve threshold"
 
         # Flag Case #2: The number of requested days is too large (DSP).
-        if submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
+        elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
             needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
         # TODO: Add other flag cases here (e.g. total # extensions is >= 6, or something like that...)
-        if not submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
+        elif not submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
             needs_human = f"student requested too many assignment extensions ({num_requests}) in one form submission"
 
         # Passed all cases, so proceed.
