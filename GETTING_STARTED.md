@@ -29,6 +29,8 @@ We're currently working on improving this step so that each course doesn't need 
 
 ### Part 3: Configuring Google Forms/Sheets
 
+*Estimated Time: 15 minutes*
+
 **Cloning the Form/Sheet**
 
 1. Make a copy of [this spreadsheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit?usp=sharing). Make sure to rename it to "CS ___ SP22 Extensions Backend"
