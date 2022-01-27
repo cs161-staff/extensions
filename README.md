@@ -1,4 +1,4 @@
-# CS 161 Extension Pipeline
+# The CS 161 Extension Pipeline
 
 The CS 161 Extensions Pipeline is a lightweight framework designed for tracking, approving, and managing extension requests in medium and large classes (e.g. N > 50). It's optimized for courses in the EECS department at UC Berkeley, but is extensible to other departments and universities.
 
@@ -40,29 +40,25 @@ The traditional flow results in several challenges, including:
 
 The CS 161 Extension Pipeline addresses all of these challenges, significantly **reducing course staff workload** while simultaneously **improving quality-of-life for students**.
 
-# The Pipeline
-
-## Student Workflow
+# Our Pipeline: Student Workflow
 
 Students request an extension through a Google Form (see an example [here](https://docs.google.com/forms/d/e/1FAIpQLScearqptcOVkcmneQ97zJ07i-r_dtokwhb2rAtTv_WK6a2nJw/viewform)). 
-
-**If a student's a DSP student with an accommodation for assignment extensions,** they can declare that on the form. (We recommend that all students who fall under this category receive auto-approvals for extension requests fewer than 7 days.)
-
-![image-20220127093404668](README.assets/image-20220127093404668.png)
 
 **If a student knows which assignments they want to request an extension on,** then they're prompted to select from a list of assignments, and provide a number of days for each extension. They can either enter a single number (which will apply to all assignments that they select), or enter comma-separated numbers (to allow them to request a different number of days for different assignments).
 
 ![image-20220127093941023](README.assets/image-20220127093941023.png)
 
-**If a student's working with a partner**, then they're requested to enter their partner's email and SID. Their  partner will be included in extensions for any assignments that they select which are marked as partner projects.
+**If a student's working with a partner**, then they're asked to enter their partner's email and SID. Their  partner will be included in extensions for any assignments that they select which are marked as partner projects.
 
 **If a student doesn't know what assignment they need an extension on,** they can request a meeting with a TA. We've seen this happen for students who're in extenuating circumstances, and just need to talk through their situation before deciding upon a specific request.
+
+**If a student's a DSP student with an accommodation for assignment extensions,** they can declare that on the form. (We recommend that all students who fall under this category receive auto-approvals for extension requests fewer than 7 days.)
 
 **When a student's request has been approved (either manually or automatically),** students receive a templated email with their updated assignment deadlines. ![image-20220127094604714](README.assets/image-20220127094604714.png)
 
 ...and that's it for students!
 
-## Staff Workflow
+# Our Pipeline: Staff Workflow
 
 Staff view all extensions on a master spreadsheet, with two main tabs: a **Form Responses** tab, which contains all form responses from students, and a **Roster** tab, which contains a list of all students in the course, with a column for each assignment. The **Roster** looks like this:
 
@@ -119,7 +115,7 @@ When an error occurs, staff should:
 
 If, during a student meeting (or through some other channel, like a Piazza post), staff would like to grant a student an extension on an assignment, staff should enter the number of days to extend the assignment by directly onto the student record on the **Roster**, and throw the student record in the queue for outbound emails. This is a natural "form bypass" case, where a form submission isn't required to grant a student an extension, but these specially-granted extensions are still tracked alongside the rest of the student's extension requests.
 
-## Configuration
+# Configuration
 
 All configuration values (e.g. API keys, email options) are stored on the spreadsheet itself, in the **"Environment Variable"** tab.
 
@@ -131,14 +127,32 @@ Assignments may be dynamically configured as well, through the **"Assignments"**
 
 # Edge Cases & FAQ's
 
-**<u>In what cases are extensions auto-approved?</u>**
-
 **<u>In what cases are extensions flagged for human approval?</u>**
 
-**<u>What if a student submits an extension request with a partner?</u>**
+These cases are flagged for human approval:
+
+- The student requests a large number of extension days for any single assignment. This threshold is `AUTO_APPROVE_THRESHOLD` and `AUTO_APPROVE_THRESHOLD_DSP` for students with DSP accommodations for assignment extensions.
+- The student requests extensions for a large number of assignments. This threshold is `AUTO_APPROVE_ASSIGNMENT_THRESHOLD`.
+- The **student record** has "work-in-progress" (e.g. the row on the roster is red or yellow - the student either has an existing pending request or ongoing student meeting).
+
+All other cases are auto-approved! [See here for the logic that handles these cases.](https://github.com/cs161-staff/extensions/blob/master/src/handle_form_submit.py#L63)
 
 **<u>How do I make it so that all extensions (regardless of status) require manual approval?</u>**
 
+If you want tighter control over what's approved, set `AUTO_APPROVE_THRESHOLD` to `0` and `AUTO_APPROVE_THRESHOLD_DSP` to `0`. It doesn't matter what you set `AUTO_APPROVE_ASSIGNMENT_THRESHOLD` to.
+
+**<u>What if a student submits an extension request with a partner?</u>**
+
+Any requested extensions for assignments that are "partner" assignments will apply to the designated partner as well as the student. Both student records will be updated on the **Roster**, and the logic for approval will apply to both partners (e.g. if Partner A submits the form and Partner B has a "work-in-progress" record, then the extension as a whole will be flagged for manual approval).
+
 **<u>What happens if this thing internally combusts in the middle of the semester?</u>**
 
+While unlikely, this is a very simple failover case: just process form submissions into the **Roster** spreadsheet manually, and send templated emails through something like YAMM.
+
 **<u>Wait, I still have to update the student's due date in OKPY/Gradescope/PL so that they'll be able to turn in their assignments late, right?</u>**
+
+You could do this (manually) after each extension request, if you'd like. Alternatively, you could set the "late" due date on these assignments to the end of the semester, and use the extension data on the **Roster** during grade compilation (this is what CS 161 & CS 61C do). Students will see their assignments marked as "late", but they'll be able to use the email they received as proof of their granted extension, just in case they notice inconsistencies in their grade reports.
+
+**<u>What about long-term maintenance?</u>**
+
+Due to the simplicity of this project's architecture (no frontend, configuration is entirely dynamic, etc.), we don't anticipate this project needing a lot of long-term maintenance! And feature requests are simple to add, since the code is well-documented with Python class abstractions.
