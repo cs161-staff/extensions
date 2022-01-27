@@ -196,7 +196,7 @@ def handle_form_submit(request_json):
         def send_email(user: StudentRecord):
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
-                email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
+                email = Email.from_student_record(student=user, assignment_manager=assignment_manager)
                 email.send()
             except Exception as err:
                 raise KnownError(
@@ -214,5 +214,7 @@ def handle_form_submit(request_json):
             partner.set_status_approved()
             partner.dispatch_writes()
             send_email(partner)
+            slack.send_student_update("An extension request was automatically approved (for a partner, too)!", autoapprove=True)
 
-        slack.send_student_update("An extension request was automatically approved!", autoapprove=True)
+        else:
+            slack.send_student_update("An extension request was automatically approved!", autoapprove=True)

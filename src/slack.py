@@ -20,7 +20,7 @@ class SlackManager:
         self.warnings = []
 
         if Environment.contains("SLACK_ENDPOINT_DEBUG"):
-            if Environment.get("SLACK_ENDPOINT_DEBUG") != Environment.get('SLACK_ENDPOINT'):
+            if Environment.get("SLACK_ENDPOINT_DEBUG") != Environment.get("SLACK_ENDPOINT"):
                 self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT_DEBUG")))
 
     def add_warning(self, warning: str):
@@ -31,7 +31,8 @@ class SlackManager:
         text += "> *Assignment(s)*: " + self.submission.get_raw_requests() + "\n"
         text += "> *Days*: " + self.submission.get_raw_days() + "\n"
         text += "> *Reason*: " + self.submission.get_reason() + "\n"
-
+        if self.submission.claims_dsp():
+            text += "> *DSP Accomodations for Extensions*: " + self.submission.dsp_status() + "\n"
         if self.submission.has_partner():
             text += "> *Partner Email*: " + self.submission.get_partner_email() + "\n"
         return text

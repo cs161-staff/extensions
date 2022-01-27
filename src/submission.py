@@ -21,7 +21,7 @@ class FormSubmission:
         print(form_payload)
 
         self.responses = {}
-        
+
         for row in question_sheet.get_all_records():
             question = row.get("question")
             if not question:
@@ -40,7 +40,7 @@ class FormSubmission:
     def get_email(self) -> str:
         return str(self.responses["email"])
 
-    def dsp_status(self) -> bool:
+    def dsp_status(self) -> str:
         return self.responses["is_dsp"]
 
     def claims_dsp(self) -> bool:
@@ -51,10 +51,10 @@ class FormSubmission:
         return self.responses["knows_assignments"] == "Yes"
 
     def get_raw_requests(self) -> str:
-        return self.responses['assignments']
+        return self.responses["assignments"]
 
     def get_raw_days(self) -> str:
-        return self.responses['days']
+        return self.responses["days"]
 
     def get_requests(self, assignment_manager: AssignmentManager) -> Dict[str, Any]:
         """
@@ -76,20 +76,21 @@ class FormSubmission:
             requests = {}
             for name, days in zip(names, days):
                 assignment_id = assignment_manager.name_to_id(name)
-                num_days = int(days)
+                try:
+                    num_days = int(days)
+                except Exception:
+                    raise FormInputError(
+                        f"failed to cast student input for # days to integer (please correct and reprocess): {days}"
+                    )
                 if num_days <= 0:
                     raise FormInputError("# requested days must be > 0")
-                    
+
                 requests[assignment_id] = num_days
 
             return requests
 
         except Exception as e:
-            raise FormInputError(
-                "An error occurred while processing this student's form submission.\n"
-                + f"Submission: {self.responses}\n"
-                + f"Error: {e}"
-            )
+            raise FormInputError(f"An error occurred while processing this student's form submission: {e}")
 
     def get_reason(self) -> str:
         return self.responses["reason"]

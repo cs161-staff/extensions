@@ -1,38 +1,38 @@
 {
-    "spreadsheet_url": "https://docs.google.com/spreadsheets/d/154UAubTvN3nF2LL3jf7hRmc1wbChmmoj3gat8kjRIGE/edit#gid=1164376949",
+    "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit",
     "form_data": {
         "Timestamp": [
-            "2022-01-17T22:54:09.654Z"
+            "2022-01-27T20:46:42.125Z"
         ],
         "Student ID Number": [
-            3033748423
+            0
         ],
         "Email": [
-            "shomil+cs161@berkeley.edu"
+            "shomil+0@berkeley.edu"
         ],
         "Are you a DSP student with an accommodation for assignment extensions?": [
-            "No"
+            "Yes"
         ],
         "Do you know what assignments(s) you need extensions on?": [
             "Yes"
         ],
         "Which assignment would you like an extension on?": [
-            "Project 1 (Code/Writeup)"
+            "Homework 1, Project 1 Checkpoint, Project 1 (Code/Writeup)"
         ],
         "How many days would you like an extension for?": [
-            7
+            "7 days"
         ],
         "Why do you need this extension?": [
-            "I have two midterms this week and I'm super stressed, so I'd love a three day extension on the checkpoint!"
+            "Extremely concerning medical issues with my grandparents that I'm quite genuinely entrenched in as a result of having lived with them for a year, worsening of my mental health and DSP-related concerns, am completely behind on lecture and discussion content"
         ],
         "Are you working with a partner on this assignment?": [
-            "No"
+            "Yes"
         ],
         "What is your partner's email?": [
-            ""
+            "shomil+1@berkeley.edu"
         ],
         "What is your partner's Student ID?": [
-            ""
+            1
         ],
         "About how long do you think you will have issues? When are you free to chat with a TA to make a game plan for the class?": [
             ""
