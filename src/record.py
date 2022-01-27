@@ -45,7 +45,7 @@ class StudentRecord:
         return self.table_record["sid"]
 
     def is_dsp(self):
-        return self.table_record["is_dsp"]
+        return self.table_record["is_dsp"] == "Yes"
 
     def get_status(self):
         return self.table_record["approval_status"]
