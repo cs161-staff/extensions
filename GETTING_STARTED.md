@@ -49,7 +49,7 @@ We're currently working on improving this step so that each course doesn't need 
    - Click on "Triggers" in the sidebar (the little clock icon).
 
    - Add a **onFormSubmit** trigger that looks like this:
-     ![img](/Users/shomil/Documents/github/school/161/extensions/GETTING_STARTEd.assets/0Ur-tyYJ95715JEYTO3McmVlv8UXtcuSj448PzjfeVY1SWfRJO7X6lSl6_S5bWEsb2pa8WHg75BhFNfvNx65NZG9IbZv_QxrN3l3aZBqY97EDJLBS8tcW1ktBP9fwqZ512G5Tsy3-3315320.png)
+     ![img](GETTING_STARTEd.assets/0Ur-tyYJ95715JEYTO3McmVlv8UXtcuSj448PzjfeVY1SWfRJO7X6lSl6_S5bWEsb2pa8WHg75BhFNfvNx65NZG9IbZv_QxrN3l3aZBqY97EDJLBS8tcW1ktBP9fwqZ512G5Tsy3-3315320.png)
 
 **Configuring Roster**
 
