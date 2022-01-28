@@ -156,3 +156,10 @@ You could do this (manually) after each extension request, if you'd like. Altern
 **<u>What about long-term maintenance?</u>**
 
 Due to the simplicity of this project's architecture (no frontend, configuration is entirely dynamic, etc.), we don't anticipate this project needing a lot of long-term maintenance! And feature requests are simple to add, since the code is well-documented with Python class abstractions.
+
+**<u>What if I want to change an assignment deadline after extension requests have already come in?</u>**
+
+You can handle this in any way that you'd like! Two common approaches –
+
+1. Clear out previously-assigned extension requests, and email all students who had requested an extension to re-submit an extension if they need more days past the extended deadline. To clear out existing requests, just clear the assignment column on the **Roster.**
+2. Apply all current extension requests to the new deadline. For this, update the deadline in the **Assignments** tab, filter the **Roster** to all students with an extension request for the assignment, and add all rows to the email queue; then, dispatch emails. All students who requested an extension will receive a new email with an extended deadline that's adjusted to the new deadline.
