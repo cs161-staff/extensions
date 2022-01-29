@@ -34,11 +34,8 @@ class FormSubmission:
 
         print(self.responses)
 
-    def get_sid(self) -> str:
-        return str(self.responses["sid"])
-
     def get_email(self) -> str:
-        return str(self.responses["email"])
+        return str(self.responses["email"]).lower()
 
     def dsp_status(self) -> str:
         return self.responses["is_dsp"]
@@ -102,7 +99,7 @@ class FormSubmission:
         return self.responses["partner_sid"]
 
     def get_partner_email(self) -> str:
-        return self.responses["partner_email"]
+        return str(self.responses["partner_email"]).lower()
 
     def get_game_plan(self) -> str:
         return self.responses["game_plan"]

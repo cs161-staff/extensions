@@ -39,10 +39,7 @@ class StudentRecord:
         return self.table_record["name"]
 
     def get_email(self):
-        return self.table_record["email"]
-
-    def get_sid(self):
-        return self.table_record["sid"]
+        return self.table_record["email"].lower()
 
     def is_dsp(self):
         return self.table_record["is_dsp"] == "Yes"
@@ -124,8 +121,8 @@ class StudentRecord:
             self.table_record[col_key] = value
 
     @staticmethod
-    def from_sid(sid: str, sheet_records: Sheet) -> StudentRecord:
-        query_result = sheet_records.get_record_by_id(id_column="sid", id_value=sid)
+    def from_email(email: str, sheet_records: Sheet) -> StudentRecord:
+        query_result = sheet_records.get_record_by_id(id_column="email", id_value=email)
         if not query_result:
-            raise FormInputError(f"This student's SID was not found (sid: {sid}).")
+            raise FormInputError(f"This student's email was not found: {email}")
         return StudentRecord(table_index=query_result[0], table_record=query_result[1], sheet=sheet_records)

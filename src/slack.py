@@ -54,6 +54,15 @@ class SlackManager:
             response = webhook.send(text=message)
             self.check_error(response)
 
+    @staticmethod
+    def get_tags() -> str:
+        slack_tags = Environment.safe_get("SLACK_TAG_LIST")
+        prefix = ""
+        if slack_tags:
+            uids = [row.strip() for row in slack_tags.split(",")]
+            prefix = " ".join([f"<@{uid}>" for uid in uids]) + " "
+        return prefix
+
     def send_student_update(self, message: str, autoapprove: bool = False) -> None:
         message += "\n"
         if self.submission.knows_assignments():
@@ -83,14 +92,11 @@ class SlackManager:
         if autoapprove:
             for webhook in self.webhooks:
                 response = webhook.send(text=message)
-                self.check_error(response)
+                self.check_error(response=response)
         else:
-            slack_tags = Environment.safe_get("SLACK_TAG_LIST")
-            prefix = ""
-            if slack_tags:
-                uids = [row.strip() for row in slack_tags.split(",")]
-                prefix = " ".join([f"<@{uid}>" for uid in uids]) + " "
-            message = prefix + message
+            # This isn't an auto-approval, so attach tags!
+            tags = SlackManager.get_tags()
+            message = tags + message
             for webhook in self.webhooks:
                 response = webhook.send(
                     blocks=[
@@ -112,7 +118,9 @@ class SlackManager:
 
     def send_error(self, error: str) -> None:
         for webhook in self.webhooks:
-            webhook.send(text="An error occurred: " + "\n" + "```" + "\n" + error + "\n" + "```")
+            tags = SlackManager.get_tags()
+            response = webhook.send(text=tags + "An error occurred: " + "\n" + "```" + "\n" + error + "\n" + "```")
+            self.check_error(response=response)
 
     def check_error(self, response: WebhookResponse):
         if response.status_code != 200:

@@ -78,34 +78,38 @@ class Email:
             body=body,
         )
 
-    def preview(self) -> None:
-        print("To:", self.to_email)
-        print("From:", self.from_email)
-        print("Cc:", self.cc_emails)
-        print("Subject:", self.subject)
-        print("Body:")
-        print(self.body)
-
     def send(self) -> None:
         # TODO: When 162 adds HTML support, bring back HTML emails.
         # html_body = Markdown().convert(self.body)
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
-        extra_headers = [('Reply-To', Environment.get("EMAIL_REPLY_TO"))]
+        extra_headers = [("Reply-To", Environment.get("EMAIL_REPLY_TO"))]
         if self.cc_emails:
             header = ("Cc", ", ".join(self.cc_emails))
             print(header)
             extra_headers.append(header)
 
+        sender = Environment.get("EMAIL_FROM")
+
         try:
-            send_email(
-                sender=Environment.get("EMAIL_FROM"),
-                target=self.to_email,
-                targets=self.cc_emails,
-                subject=self.subject,
-                body=self.body,
-                _impersonate="mail",
-                extra_headers=extra_headers,
-            )
+            if Environment.contains("APP_MASTER_SECRET"):
+                send_email(
+                    sender=sender,
+                    target=self.to_email,
+                    targets=self.cc_emails,
+                    subject=self.subject,
+                    body=self.body,
+                    _impersonate="mail",
+                    extra_headers=extra_headers,
+                )
+            else:
+                print("Assuming debug mode, since no APP_MASTER_SECRET.")
+                print("Sender:", sender)
+                print("To:", self.to_email)
+                print("Targets:", self.cc_emails)
+                print("Subject:", self.subject)
+                print("Extra Headers:", extra_headers)
+                print("Body:", self.body)
+
         except Exception as e:
             print(self.body)
             raise EmailError("An error occurred while sending an email:", e)

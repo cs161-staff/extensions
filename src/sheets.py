@@ -34,7 +34,7 @@ class Sheet:
     def get_record_by_id(self, id_column: str, id_value: str) -> Optional[Tuple[int, Dict[str, Any]]]:
         all_records = self.get_all_records()
         for i, record in enumerate(all_records):
-            if record.get(id_column) == id_value:
+            if str(record.get(id_column)).lower() == str(id_value).lower():
                 return (i, record)
         return None
 
