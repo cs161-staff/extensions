@@ -90,7 +90,7 @@ class Email:
         # TODO: When 162 adds HTML support, bring back HTML emails.
         # html_body = Markdown().convert(self.body)
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
-        extra_headers = []
+        extra_headers = [('Reply-To', Environment.get("EMAIL_REPLY_TO"))]
         if self.cc_emails:
             header = ("Cc", ", ".join(self.cc_emails))
             print(header)
@@ -100,6 +100,7 @@ class Email:
             send_email(
                 sender=Environment.get("EMAIL_FROM"),
                 target=self.to_email,
+                targets=self.cc_emails,
                 subject=self.subject,
                 body=self.body,
                 _impersonate="mail",

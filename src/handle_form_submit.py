@@ -206,15 +206,17 @@ def handle_form_submit(request_json):
 
         student.set_status_approved()
         student.dispatch_writes()
-        send_email(student)
 
         if partner:
             partner.set_status_approved()
             partner.dispatch_writes()
-            send_email(partner)
             slack.send_student_update(
                 "An extension request was automatically approved (for a partner, too)!", autoapprove=True
             )
 
         else:
             slack.send_student_update("An extension request was automatically approved!", autoapprove=True)
+
+        send_email(student)
+        if partner:
+            send_email(partner)
