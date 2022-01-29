@@ -10,3 +10,7 @@ Note: for the latest "state" of the template spreadsheet, see [here](https://doc
 - **[feature]** Feel free to add a `SLACK_TAG_LIST` environment variable, with zero or more comma-separated lists of users who you'd like to tag in Slack messages that require manual approval. This is helpful in classes that have many auto-approvals (e.g. you can see all action-related items chronologically in your Slack `Mentions and Reactions`).
 - **[update]** Emails (instead of SID's) are now used to look up students & partners on the roster. We recommend keeping the SID field on your form as a fallback, just in case the student's email is not found.
 - **[migration]** The migration from SendGrid to CS 162's mailserver is complete. The `SENDGRID_API_KEY` environment variable is no longer needed. You may want to reformat your `EMAIL_FROM` address to be in the form of `Sender Name <senderemail@berkeley.edu>`, so that email clients recognize and use the sender name. Note that your sender email can be any @berkeley.edu email.
+
+### 2022-01-27
+
+- **[fix]** We noticed that the Form Template that we released to some classes had incorrect regex validation for the "# of Days" question. To fix this issue, on your form, for the validation of that question's input, set it to "Regular expression matches `\d+(,\d+)*`".
