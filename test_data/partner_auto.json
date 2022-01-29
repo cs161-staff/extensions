@@ -2,43 +2,46 @@
     "spreadsheet_url": "https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit",
     "form_data": {
         "Timestamp": [
-            "2022-01-27T20:46:42.125Z"
+            "2022-01-28T23:21:48.416Z"
         ],
         "Student ID Number": [
-            0
+            4
         ],
         "Email": [
-            "shomil+0@berkeley.edu"
+            "shomil+4@berkeley.edu"
         ],
         "Are you a DSP student with an accommodation for assignment extensions?": [
-            "Yes"
+            "No"
         ],
         "Do you know what assignments(s) you need extensions on?": [
             "Yes"
         ],
         "Which assignment would you like an extension on?": [
-            "Homework 1, Project 1 Checkpoint, Project 1 (Code/Writeup)"
+            "Project 1 Checkpoint, Project 1 (Code/Writeup)"
         ],
         "How many days would you like an extension for?": [
-            8
+            3
         ],
         "Why do you need this extension?": [
-            "Extremely concerning medical issues with my grandparents that I'm quite genuinely entrenched in as a result of having lived with them for a year, worsening of my mental health and DSP-related concerns, am completely behind on lecture and discussion content"
+            "Test case: project autoapprove with partner"
         ],
         "Are you working with a partner on this assignment?": [
             "Yes"
         ],
         "What is your partner's email?": [
-            "shomil+1@berkeley.edu"
+            "shomil+5@berkeley.edu"
         ],
         "What is your partner's Student ID?": [
-            1
+            5
         ],
         "About how long do you think you will have issues? When are you free to chat with a TA to make a game plan for the class?": [
             ""
         ],
         "Rerun": [
             true
+        ],
+        "": [
+            null
         ]
     }
 }

@@ -67,7 +67,7 @@ def handle_form_submit(request_json):
         print("Student requested general extension without specific assignments...")
         student.set_status_requested_meeting()
         student.dispatch_writes()
-        slack.send_student_update("*[Action Required]* A student requested a student support meeting. Details:")
+        slack.send_student_update("A student requested a student support meeting.")
         return
 
     # -----------------------------------------------------------------------------------------------------------------
@@ -151,8 +151,7 @@ def handle_form_submit(request_json):
         partner.set_status_pending()
         partner.dispatch_writes()
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work-in-progress for this student's record). "
-            + "Details:"
+            "An extension request could not be auto-approved (there is work-in-progress for this student's record)."
         )
 
     # Case (2): Submission contains partner, and partner's status is a "work-in-progress"
@@ -163,8 +162,7 @@ def handle_form_submit(request_json):
         student.dispatch_writes()
 
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work-in-progress for this student's partner). "
-            + "Details:"
+            "An extension request could not be auto-approved (there is work-in-progress for this student's partner)."
         )
 
     # Case (3): Submission doesn't contain partner, and student's status is a "work-in-progress"
@@ -173,7 +171,7 @@ def handle_form_submit(request_json):
     elif student.has_wip_status():
         student.dispatch_writes()
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work in progress for this student). Details:"
+            "An extension request could not be auto-approved (there is work in progress for this student)."
         )
 
     # Case (4): Student's status (and, if applicable, partner's status) are "clean" - there is no pending
@@ -187,7 +185,7 @@ def handle_form_submit(request_json):
             partner.set_status_pending()
             partner.dispatch_writes()
 
-        slack.send_student_update(f"An extension request could not be auto-approved (reason: {needs_human}). Details:")
+        slack.send_student_update(f"An extension request could not be auto-approved (reason: {needs_human}).")
 
     # Case (5): Student's status (and, if applicable, partner's status) are "clean" - and the extension as a whole
     # qualifies for an auto-extension! So we can go ahead and process the extension for the student and the partner.
@@ -201,7 +199,7 @@ def handle_form_submit(request_json):
             except Exception as err:
                 raise KnownError(
                     "Writes to spreadsheet succeed, but email to student failed.\n"
-                    + "Please follow up with this student manually and/or check SendGrid logs.\n"
+                    + "Please follow up with this student manually and/or check email logs.\n"
                     + "Error: "
                     + str(err)
                 )
@@ -214,7 +212,9 @@ def handle_form_submit(request_json):
             partner.set_status_approved()
             partner.dispatch_writes()
             send_email(partner)
-            slack.send_student_update("An extension request was automatically approved (for a partner, too)!", autoapprove=True)
+            slack.send_student_update(
+                "An extension request was automatically approved (for a partner, too)!", autoapprove=True
+            )
 
         else:
             slack.send_student_update("An extension request was automatically approved!", autoapprove=True)

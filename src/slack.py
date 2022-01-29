@@ -24,12 +24,12 @@ class SlackManager:
                 self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT_DEBUG")))
 
     def add_warning(self, warning: str):
-        self.warnings.append(warning)
+        if warning not in self.warnings:
+            self.warnings.append(warning)
 
     def _get_submission_details_knows_assignments(self):
         text = "> *Email*: " + self.submission.get_email() + "\n"
         text += "> *Assignment(s)*: " + self.submission.get_raw_requests() + "\n"
-        text += "> *Days*: " + self.submission.get_raw_days() + "\n"
         text += "> *Reason*: " + self.submission.get_reason() + "\n"
         if self.submission.claims_dsp():
             text += "> *DSP Accomodations for Extensions*: " + self.submission.dsp_status() + "\n"
@@ -39,7 +39,7 @@ class SlackManager:
 
     def _get_submission_details_unknown_assignments(self):
         text = "> *Email*: " + self.submission.get_email() + "\n"
-        text = "> *Notes*: " + self.submission.get_game_plan() + "\n"
+        text += "> *Notes*: " + self.submission.get_game_plan() + "\n"
         return text
 
     def set_current_student(
@@ -62,16 +62,15 @@ class SlackManager:
             message += self._get_submission_details_unknown_assignments()
 
         message += "\n"
-        message += "This student's extension request summary is below:"
-        headers = ["Assignment", "# Days Requested"]
         rows = []
         for assignment_id in self.assignment_manager.get_all_ids():
             num_days = self.student.get_assignment(assignment_id)
             if num_days:
                 rows.append([self.assignment_manager.id_to_name(assignment_id), num_days])
-        message += "```"
-        message += tabulate(rows, headers=headers)
-        message += "```"
+        if len(rows) > 0:
+            message += "```"
+            message += tabulate(rows)
+            message += "```"
         message += "\n"
         message += "\n"
         if len(self.warnings) > 0:
@@ -86,6 +85,12 @@ class SlackManager:
                 response = webhook.send(text=message)
                 self.check_error(response)
         else:
+            slack_tags = Environment.safe_get("SLACK_TAG_LIST")
+            prefix = ""
+            if slack_tags:
+                uids = [row.strip() for row in slack_tags.split(",")]
+                prefix = " ".join([f"<@{uid}>" for uid in uids]) + " "
+            message = prefix + message
             for webhook in self.webhooks:
                 response = webhook.send(
                     blocks=[

@@ -48,7 +48,7 @@ def handle_email_queue(request_json):
             except Exception as err:
                 raise KnownError(
                     f"Attempted to send an email to {student.get_email()}, but failed.\n"
-                    + "Please follow up with this student manually and/or check SendGrid logs.\n"
+                    + "Please follow up with this student manually and/or check email logs.\n"
                     + "If this is a spreadsheet error, correct the error, and re-run email queue processor.\n"
                     + "Error: "
                     + str(err)
