@@ -10,7 +10,7 @@ At a high level, this pipeline consists of:
   - Receives form data through a simple **Google Apps Script** trigger.
   - Process form data in combination with a student's "record" (which includes DSP status and prior extension requests) to enter either an auto-approval or manual-approval flow.
   - Sends updates to staff through a **Slack Webhook**, enabling simple internal discussion of student cases through Slack threads.
-  - Sends updates to students through the **SendGrid API**.
+  - Sends updates to students through the **CS 162 Mailserver** via **CS 61A's RPC Interface**.
 
 # Background
 
