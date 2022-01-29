@@ -19,13 +19,13 @@ class Email:
 
     def __init__(
         self,
-        to_emails: List[str],
+        to_email: str,
         from_email: List[str],
         cc_emails: List[str],
         subject: str,
         body: str,
     ) -> None:
-        self.to_emails = to_emails
+        self.to_email = to_email
         self.from_email = from_email
         self.cc_emails = cc_emails
         self.subject = subject
@@ -68,9 +68,10 @@ class Email:
         body += "\n\n"
         body += "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in this thread, and feel free to reply to this thread if you'd like to follow up with us!"
 
-        cc_emails = [e.strip() for e in Environment.safe_get("EMAIL_CC", "").split(",")]
+        cc_emails = [email.strip() for email in Environment.safe_get("EMAIL_CC", "").split(",")]
+
         return Email(
-            to_emails=[student.get_email()],
+            to_email=student.get_email(),
             from_email=Environment.get("EMAIL_FROM"),
             cc_emails=cc_emails,
             subject=Environment.get("EMAIL_SUBJECT"),
@@ -78,9 +79,9 @@ class Email:
         )
 
     def preview(self) -> None:
-        print("To:", self.to_emails)
+        print("To:", self.to_email)
         print("From:", self.from_email)
-        print("CC:", self.cc_emails)
+        print("Cc:", self.cc_emails)
         print("Subject:", self.subject)
         print("Body:")
         print(self.body)
@@ -91,11 +92,14 @@ class Email:
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
         extra_headers = []
         if self.cc_emails:
-            extra_headers.append(("Cc", self.cc_emails))
+            header = ("Cc", ", ".join(self.cc_emails))
+            print(header)
+            extra_headers.append(header)
+
         try:
             send_email(
                 sender=Environment.get("EMAIL_FROM"),
-                target=self.to_emails,
+                target=self.to_email,
                 subject=self.subject,
                 body=self.body,
                 _impersonate="mail",
