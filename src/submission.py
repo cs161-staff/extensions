@@ -32,7 +32,11 @@ class FormSubmission:
             if question in form_payload:
                 self.responses[key] = str(form_payload[question][0])
 
+        self.responses['Timestamp'] = form_payload['Timestamp'][0]
         print(self.responses)
+
+    def get_timestamp(self) -> str:
+        return self.responses["Timestamp"]
 
     def get_email(self) -> str:
         return str(self.responses["email"]).lower()

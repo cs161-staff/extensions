@@ -104,9 +104,14 @@ def handle_form_submit(request_json):
         elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
             needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
-        # TODO: Add other flag cases here (e.g. total # extensions is >= 6, or something like that...)
+        # Flag Case #3: The student has requested extensions on too many assignments in a single submission
         elif not submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
             needs_human = f"student requested too many assignment extensions ({num_requests}) in one form submission"
+
+        # Flag Case #4: This extension request is retroactive (the due date is in the past)
+        elif assignment_manager.is_retroactive(assignment_id=assignment_id, request_time=submission.get_timestamp()):
+            needs_human = "student requested a retroactive extension on an assignment"
+            slack.add_warning(f"[{assignment_id}] student requested a retroactive extension")
 
         # Passed all cases, so proceed.
         else:

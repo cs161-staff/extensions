@@ -2,7 +2,7 @@ import os
 from typing import Any, Dict, List, Optional, Tuple
 import gspread
 
-from src.errors import ConfigurationError, SheetError
+from src.errors import ConfigurationError, KnownError, SheetError
 from gspread.worksheet import Worksheet
 
 SHEET_STUDENT_RECORDS = "Roster"
@@ -26,10 +26,16 @@ class Sheet:
         raise ConfigurationError("Too few values in sheet...")
 
     def get_all_values(self) -> List[List[Any]]:
-        return self.sheet.get_all_values()
+        try:
+            return self.sheet.get_all_values()
+        except gspread.exceptions.APIError as e:
+            raise KnownError("Google Sheets API Error: " + str(e))
 
     def get_all_records(self) -> List[Dict[str, Any]]:
-        return self.sheet.get_all_records(numericise_ignore=['all'])
+        try:
+            return self.sheet.get_all_records(numericise_ignore=["all"])
+        except gspread.exceptions.APIError as e:
+            raise KnownError("Google Sheets API Error: " + str(e))
 
     def get_record_by_id(self, id_column: str, id_value: str) -> Optional[Tuple[int, Dict[str, Any]]]:
         all_records = self.get_all_records()

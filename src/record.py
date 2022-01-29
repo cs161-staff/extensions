@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 
 from typing import Any, Dict, Optional
 from src.assignments import AssignmentManager
@@ -15,6 +16,11 @@ EMAIL_STATUS_PENDING = "Pending Approval"
 EMAIL_STATUS_IN_QUEUE = "In Queue"
 EMAIL_STATUS_AUTO_SENT = "Auto Sent"
 EMAIL_STATUS_MANUAL_SENT = "Manually Sent"
+
+from datetime import datetime
+from pytz import timezone
+
+PST = timezone("US/Pacific")
 
 
 class StudentRecord:
@@ -119,6 +125,13 @@ class StudentRecord:
             # once writes are dispatched to backend, update the local object as well (this is so that it shows
             # up in the email that's generated)
             self.table_record[col_key] = value
+
+        if "last_updated" in headers:
+            row_index = self.table_index
+            col_index = headers.index("last_updated")
+            value = PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+            self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
+            self.table_record["last_updated"] = value
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:
