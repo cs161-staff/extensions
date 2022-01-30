@@ -30,7 +30,7 @@ class SlackManager:
     def _get_submission_details_knows_assignments(self):
         text = "> *Email*: " + self.submission.get_email() + "\n"
         text += "> *Assignment(s)*: " + self.submission.get_raw_requests() + "\n"
-        text += "> *Reason*: " + self.submission.get_reason() + "\n"
+        text += "> *Reason*: " + self.submission.get_reason().replace("\n", " ") + "\n"
         if self.submission.claims_dsp():
             text += "> *DSP Accomodations for Extensions*: " + self.submission.dsp_status() + "\n"
         if self.submission.has_partner():
