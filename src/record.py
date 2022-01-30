@@ -41,26 +41,17 @@ class StudentRecord:
             or self.approval_status() == APPROVAL_STATUS_PENDING
         )
 
-    def get_name(self):
-        return self.table_record["name"]
-
     def get_email(self):
         return self.table_record["email"].lower()
 
     def is_dsp(self):
-        return self.table_record["is_dsp"] == "Yes"
-
-    def get_status(self):
-        return self.table_record["approval_status"]
+        return self.table_record.get("is_dsp", "No") == "Yes"
 
     def get_email_comments(self) -> None:
-        return self.table_record.get("email_comments")
-
-    def get_email_status(self):
-        return self.table_record["email_status"]
+        return self.table_record.get("email_comments", "")
 
     def approval_status(self):
-        return self.table_record["approval_status"]
+        return self.table_record.get("approval_status", "")
 
     def email_status(self):
         return self.table_record["email_status"]
@@ -116,7 +107,7 @@ class StudentRecord:
     def queue_write_back(self, col_key: str, col_value: Any) -> Optional[str]:
         self.write_queue.append((col_key, col_value))
 
-    def dispatch_writes(self):
+    def flush(self):
         headers = self.sheet.get_headers()
         for col_key, value in self.write_queue:
             row_index = self.table_index

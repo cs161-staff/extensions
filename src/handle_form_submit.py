@@ -62,7 +62,7 @@ def handle_form_submit(request_json):
     if not submission.knows_assignments():
         print("Student requested general extension without specific assignments...")
         student.set_status_requested_meeting()
-        student.dispatch_writes()
+        student.flush()
         slack.send_student_update("A student requested a student support meeting.")
         return
 
@@ -143,9 +143,9 @@ def handle_form_submit(request_json):
     # Case (1): Submission contains partner, and student's status is a "work-in-progress".
     # We can't auto-approve here for either party (we're blocked on the student).
     if submission.has_partner() and student.has_wip_status():
-        student.dispatch_writes()
+        student.flush()
         partner.set_status_pending()
-        partner.dispatch_writes()
+        partner.flush()
         slack.send_student_update(
             "An extension request could not be auto-approved (there is work-in-progress for this student's record)."
         )
@@ -153,9 +153,9 @@ def handle_form_submit(request_json):
     # Case (2): Submission contains partner, and partner's status is a "work-in-progress"
     # We can't auto-approve here for either party (we're blocked on the partner).
     elif submission.has_partner() and partner.has_wip_status():
-        partner.dispatch_writes()
+        partner.flush()
         student.set_status_pending()
-        student.dispatch_writes()
+        student.flush()
 
         slack.send_student_update(
             "An extension request could not be auto-approved (there is work-in-progress for this student's partner)."
@@ -165,7 +165,7 @@ def handle_form_submit(request_json):
     # Here, we don't want to touch the student's status (e.g. if it's "Meeting Requested", we want to leave
     # it as such). But we do want to update the roster with the number of days requested, so we dispatch writes.
     elif student.has_wip_status():
-        student.dispatch_writes()
+        student.flush()
         slack.send_student_update(
             "An extension request could not be auto-approved (there is work in progress for this student)."
         )
@@ -175,11 +175,11 @@ def handle_form_submit(request_json):
     # for auto-approval. In this case, it doesn't -- it needs a human!
     elif needs_human:
         student.set_status_pending()
-        student.dispatch_writes()
+        student.flush()
 
         if partner:
             partner.set_status_pending()
-            partner.dispatch_writes()
+            partner.flush()
 
         slack.send_student_update(f"An extension request could not be auto-approved (reason: {needs_human}).")
 
@@ -201,11 +201,11 @@ def handle_form_submit(request_json):
                 )
 
         student.set_status_approved()
-        student.dispatch_writes()
+        student.flush()
 
         if partner:
             partner.set_status_approved()
-            partner.dispatch_writes()
+            partner.flush()
             slack.send_student_update(
                 "An extension request was automatically approved (for a partner, too)!", autoapprove=True
             )

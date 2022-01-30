@@ -43,7 +43,7 @@ def handle_email_queue(request_json):
                 emails.append(student.get_email())
                 email.send()
                 student.set_status_email_approved()
-                student.dispatch_writes()
+                student.flush()
                 sent_count += 1
             except Exception as err:
                 raise KnownError(

@@ -33,7 +33,7 @@ class Email:
 
     @staticmethod
     def from_student_record(student: StudentRecord, assignment_manager: AssignmentManager) -> Email:
-        body = f"Hi {student.get_name()},"
+        body = f"Hi,"
         body += "\n\n"
         body += (
             "You recently requested an extension for an assignment. "
