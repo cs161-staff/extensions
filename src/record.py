@@ -110,7 +110,8 @@ class StudentRecord:
     def flush(self):
         headers = self.sheet.get_headers()
         if "last_updated" in headers:
-            self.write_queue["last_updated"] = PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+            last_updated = str(PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S"))
+            self.write_queue["last_updated"] = last_updated
 
         if self.table_index == -1:
             print("Flushing student record, adding new row.")

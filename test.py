@@ -21,9 +21,9 @@ def test():
     # tests = ["regular_auto.json"]
     tests = [
         # "student_meeting.json",
-        "regular_auto.json",
+        # "regular_auto.json",
         # "regular_manual.json",
-        # "partner_auto.json",
+        "partner_auto.json",
         # "dsp_auto.json",
         # "regular_dne.json",
         # "partner_dne.json",

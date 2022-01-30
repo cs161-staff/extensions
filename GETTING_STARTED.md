@@ -45,9 +45,9 @@ _Estimated Time: 10 minutes_
 
 **Configuring Roster**
 
-8. For now, add one or a few rows to the roster with your own names/emails/SID's that you can test with.
-   - The only columns you need to edit are "name", "email", and "sid".
-   - The "type" column isn't used for anything (it's there to help you categorize students - e.g. "Waitlisted", "Enrolled", "GLOBE", etc.).
+There isn't much you need to do to configure the roster! If you want to add your students here ahead of time, feel free to add a list of names, emails, and SID's. If you don't, students will be added "on-demand" (e.g. when a student submits an extension request). If a student submits several requests, their roster record will be updated in-place.
+
+The `name` and `sid` columns are optional - feel free to delete them if you don't need them. The `notes` column is for your own use.
 
 **Configuring Assignments**
 
