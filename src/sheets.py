@@ -18,24 +18,18 @@ class Sheet:
 
     def __init__(self, sheet: Worksheet) -> None:
         self.sheet: Worksheet = sheet
+        self.all_values = self.sheet.get_all_values()
+        self.all_records = self.sheet.get_all_records()
+        self.headers = self.all_values[0]
 
     def get_headers(self) -> List[str]:
-        table = self.sheet.get_all_values()
-        if len(table) > 1:
-            return table[0]
-        raise ConfigurationError("Too few values in sheet...")
+        return self.headers
 
     def get_all_values(self) -> List[List[Any]]:
-        try:
-            return self.sheet.get_all_values()
-        except gspread.exceptions.APIError as e:
-            raise KnownError("Google Sheets API Error: " + str(e))
+        return self.all_values
 
     def get_all_records(self) -> List[Dict[str, Any]]:
-        try:
-            return self.sheet.get_all_records(numericise_ignore=["all"])
-        except gspread.exceptions.APIError as e:
-            raise KnownError("Google Sheets API Error: " + str(e))
+        return self.all_records
 
     def get_record_by_id(self, id_column: str, id_value: str) -> Optional[Tuple[int, Dict[str, Any]]]:
         all_records = self.get_all_records()

@@ -33,7 +33,7 @@ class StudentRecord:
         self.table_record = table_record
         self.table_index = table_index
         self.sheet = sheet
-        self.write_queue = []
+        self.write_queue = {}
 
     def has_wip_status(self):
         return (
@@ -45,13 +45,13 @@ class StudentRecord:
         return self.table_record["email"].lower()
 
     def is_dsp(self):
-        return self.table_record.get("is_dsp", "No") == "Yes"
+        return self.table_record["is_dsp"] == "Yes"
 
     def get_email_comments(self) -> None:
-        return self.table_record.get("email_comments", "")
+        return self.table_record["email_comments"]
 
     def approval_status(self):
-        return self.table_record.get("approval_status", "")
+        return self.table_record["approval_status"]
 
     def email_status(self):
         return self.table_record["email_status"]
@@ -105,28 +105,41 @@ class StudentRecord:
         return False
 
     def queue_write_back(self, col_key: str, col_value: Any) -> Optional[str]:
-        self.write_queue.append((col_key, col_value))
+        self.write_queue[col_key] = col_value
 
     def flush(self):
         headers = self.sheet.get_headers()
-        for col_key, value in self.write_queue:
-            row_index = self.table_index
-            col_index = headers.index(col_key)
-            self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
-            # once writes are dispatched to backend, update the local object as well (this is so that it shows
-            # up in the email that's generated)
-            self.table_record[col_key] = value
-
         if "last_updated" in headers:
-            row_index = self.table_index
-            col_index = headers.index("last_updated")
-            value = PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
-            self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
-            self.table_record["last_updated"] = value
+            self.write_queue["last_updated"] = PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+
+        if self.table_index == -1:
+            print("Flushing student record, adding new row.")
+            values = [self.write_queue.get(header) for header in headers]
+            self.sheet.sheet.append_row(values=values)
+
+        else:
+            print("Flushing student record, updating existing row.")
+            for col, value in self.write_queue.items():
+                row_index = self.table_index
+                col_index = headers.index(col)
+                self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
+                # once writes are dispatched to backend, update the local object as well (this is so that it shows
+                # up in the email that's generated to the student.)
+                self.table_record[col] = value
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:
+        email = email.lower()
         query_result = sheet_records.get_record_by_id(id_column="email", id_value=email)
-        if not query_result:
-            raise FormInputError(f"This student's email was not found: {email}")
-        return StudentRecord(table_index=query_result[0], table_record=query_result[1], sheet=sheet_records)
+        if query_result:
+            return StudentRecord(table_index=query_result[0], table_record=query_result[1], sheet=sheet_records)
+        else:
+            new_row = {header: "" for header in sheet_records.get_headers()}
+            new_row["email"] = email
+            new_record = StudentRecord(
+                table_index=-1,
+                table_record=new_row,
+                sheet=sheet_records,
+            )
+            new_record.queue_write_back(col_key="email", col_value=email)
+            return new_record
