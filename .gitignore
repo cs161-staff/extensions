@@ -1,3 +1,5 @@
+.ipynb_checkpoints/
+*.ipynb
 *.pyc
 core/__pycache__/*
 service-account.json

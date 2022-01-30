@@ -47,7 +47,4 @@ class Environment:
             value = record.get("value")
             if not key:
                 continue
-            if not value:
-                print("WARNING: Environment variable not set: " + key)
-                continue
             os.environ[key] = str(value)
