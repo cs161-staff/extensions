@@ -4,7 +4,7 @@ Note: for the latest "state" of the template spreadsheet, see [here](https://doc
 
 - **[feature]** It's no longer necessary to add all students to your `Roster` sheet ahead of time. We recieved feedback that it's difficult to keep the roster updated through adds/drops/swaps/etc., so we migrated to an on-demand model, where students are inserted into the roster only when they submit an extension request. If they submit multiple, their existing roster entry is updated in-place.
 
-- **[update]** Student names are no longer used in sending emails (we start emails with "Hi," instead of "Hi [name],"). We recieved feedback that many students' official names aren't the names that they go by, so we migrated to a more general email greeting.
+- **[update]** Student names are no longer used in sending emails (we start emails with "Hi," instead of "Hi [name],"). We recieved feedback that many students' official names aren't the names that they go by, so we migrated to a more general email greeting. This effectively makes the `name` column on the `Roster` optional.
 
 ### 2022-01-29
 
@@ -14,7 +14,7 @@ Note: for the latest "state" of the template spreadsheet, see [here](https://doc
 ### 2022-01-28
 
 - **[feature]** Feel free to add a `SLACK_TAG_LIST` environment variable, with zero or more comma-separated lists of users who you'd like to tag in Slack messages that require manual approval. This is helpful in classes that have many auto-approvals (e.g. you can see all action-related items chronologically in your Slack `Mentions and Reactions`).
-- **[update]** Emails (instead of SID's) are now used to look up students & partners on the roster. We recommend keeping the SID field on your form as a fallback, just in case the student's email is not found.
+- **[update]** Emails (instead of SID's) are now used to look up students & partners on the roster. We recommend keeping the SID field on your form as a fallback, just in case the student's email is not found. This effectively makes the `sid` column on the `Roster` optional.
 - **[migration]** The migration from SendGrid to CS 162's mailserver is complete. The `SENDGRID_API_KEY` environment variable is no longer needed. You may want to reformat your `EMAIL_FROM` address to be in the form of `Sender Name <senderemail@berkeley.edu>`, so that email clients recognize and use the sender name. Note that your sender email can be any @berkeley.edu email.
 
 ### 2022-01-27
