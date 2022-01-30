@@ -117,14 +117,18 @@ class StudentRecord:
             values = [self.write_queue.get(header) for header in headers]
             self.sheet.sheet.append_row(values=values)
 
+            # Update local table_record object for email.
+            for col, value in self.write_queue.items():
+                self.table_record[col] = value
+
         else:
             print("Flushing student record, updating existing row.")
             for col, value in self.write_queue.items():
                 row_index = self.table_index
                 col_index = headers.index(col)
                 self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
-                # once writes are dispatched to backend, update the local object as well (this is so that it shows
-                # up in the email that's generated to the student.)
+
+                # Update local table_record object for email.
                 self.table_record[col] = value
 
     @staticmethod
