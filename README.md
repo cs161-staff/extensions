@@ -25,7 +25,7 @@ Courses traditionally collect extension requests through Google Forms (e.g. ones
 
 - Read the student's request and categorize it into a DSP or Non-DSP extension.
 - Look up whether the student has previously requested assignment extensions.
-- Either (a) update the student's requested extensions in a central spreadsheet, or (b) update the student's requested extension on Gradescope/OKPY/PrairieLearn. 
+- Either (a) update the student's requested extensions in a central spreadsheet, or (b) update the student's requested extension on Gradescope/OKPY/PrairieLearn.
 - Send an email to the student containing an "Approved" message, with a new due date.
 
 #### Challenges
@@ -35,20 +35,20 @@ The traditional flow results in several challenges, including:
 - **High potential for human error.** In every manual step, there's a chance for data entry errors that are capable of propagating downstream; in CS 161/CS 61C, we saw a large number of these that arose at the end of the semester when generating final grade reports.
 - **Communication difficulties.** For classes that outsource work to course managers, there are three parties with different views on extension data: what course managers see, what course staff see, and what students see. All communication, by default, needs to be inclusive of all three parties; if even one email is two-way instead of three-way, then information is "lost".
 
-- **Delayed processing times.** Because of the number of manual steps required here, it can take several days for students to hear back on whether or not their requests were granted, leaving them in a state of stress and uncertainty. 
-- **High barriers to requesting extensions.** Because there are so many steps in approving each extension, there's a tendency to write strongly-worded policies discouraging most student extension requests. 
+- **Delayed processing times.** Because of the number of manual steps required here, it can take several days for students to hear back on whether or not their requests were granted, leaving them in a state of stress and uncertainty.
+- **High barriers to requesting extensions.** Because there are so many steps in approving each extension, there's a tendency to write strongly-worded policies discouraging most student extension requests.
 
 The CS 161 Extension Pipeline addresses all of these challenges, significantly **reducing course staff workload** while simultaneously **improving quality-of-life for students**.
 
 # Our Pipeline: Student Workflow
 
-Students request an extension through a Google Form (see an example [here](https://docs.google.com/forms/d/e/1FAIpQLScearqptcOVkcmneQ97zJ07i-r_dtokwhb2rAtTv_WK6a2nJw/viewform)). 
+Students request an extension through a Google Form (see an example [here](https://docs.google.com/forms/d/e/1FAIpQLScearqptcOVkcmneQ97zJ07i-r_dtokwhb2rAtTv_WK6a2nJw/viewform)).
 
 **If a student knows which assignments they want to request an extension on,** then they're prompted to select from a list of assignments, and provide a number of days for each extension. They can either enter a single number (which will apply to all assignments that they select), or enter comma-separated numbers (to allow them to request a different number of days for different assignments).
 
 ![image-20220127093941023](README.assets/image-20220127093941023.png)
 
-**If a student's working with a partner**, then they're asked to enter their partner's email and SID. Their  partner will be included in extensions for any assignments that they select which are marked as partner projects.
+**If a student's working with a partner**, then they're asked to enter their partner's email and SID. Their partner will be included in extensions for any assignments that they select which are marked as partner projects.
 
 **If a student doesn't know what assignment they need an extension on,** they can request a meeting with a TA. We've seen this happen for students who're in extenuating circumstances, and just need to talk through their situation before deciding upon a specific request.
 
@@ -72,7 +72,7 @@ When an extension request comes in, staff first receive a Slack message in a pri
 
 ![image-20220127095857467](README.assets/image-20220127095857467.png)
 
-When an extension is automatically approved, staff don't need to do anything! 
+When an extension is automatically approved, staff don't need to do anything!
 
 ---
 
@@ -94,9 +94,10 @@ If the extension does not warrant an approval (or staff need more information), 
 
 1. Follow up with the student over email.
 2. Clear the **approval_status** column on the **Roster**.
-3. Set the **email_status** column on the **Roster** to **Manually Sent**. 
+3. Set the **email_status** column on the **Roster** to **Manually Sent**.
 
 ---
+
 **<u>If an extension request contains malformed data or any other error occurred,</u>** the message contains a description of the error, along with the entire form response.
 
 ![image-20220127100144172](README.assets/image-20220127100144172.png)
@@ -156,6 +157,10 @@ You could do this (manually) after each extension request, if you'd like. Altern
 **<u>What about long-term maintenance?</u>**
 
 Due to the simplicity of this project's architecture (no frontend, configuration is entirely dynamic, etc.), we don't anticipate this project needing a lot of long-term maintenance! And feature requests are simple to add, since the code is well-documented with Python class abstractions.
+
+**<u>Do I need to add all students to the roster at the beginning of the semester?</u>**
+
+No, you don't! This tool adds students to the roster on-demand (e.g. when they submit an extension request). The Google Form collects UC Berkeley emails by default, which is a robust method for identifying students and matching them to an internal CalCentral/grading roster at the end of the semester. That said, it may be useful to pre-populate rows for all students with DSP accomodations, so you have a record of who's approved for accomodations when processing extension requests.
 
 **<u>What if I want to change an assignment deadline after extension requests have already come in?</u>**
 
