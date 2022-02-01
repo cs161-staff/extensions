@@ -109,7 +109,7 @@ def handle_form_submit(request_json):
 
         # Flag Case #3: The student has requested extensions on too many assignments in a single submission
         elif not submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
-            needs_human = f"this student has requested more assignment extensions ({num_requests}) than the auto-approve threshold ({Environment.get_auto_approve_assignment_threshold())})"
+            needs_human = f"this student has requested more assignment extensions ({num_requests}) than the auto-approve threshold ({Environment.get_auto_approve_assignment_threshold()})"
 
         # Flag Case #4: This extension request is retroactive (the due date is in the past)
         elif assignment_manager.is_retroactive(assignment_id=assignment_id, request_time=submission.get_timestamp()):
