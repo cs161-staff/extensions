@@ -98,7 +98,10 @@ def handle_form_submit(request_json):
 
         # Flag Case #1: The number of requested days is too large (non-DSP).
         if not submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold():
-            needs_human = f"a request of {num_days} days is greater than auto-approve threshold"
+            if Environment.get_auto_approve_threshold() <= 0:
+                needs_human = f"auto-approve is disabled"
+            else:
+                needs_human = f"a request of {num_days} days is greater than auto-approve threshold of {Environment.get_auto_approve_threshold()} days"
 
         # Flag Case #2: The number of requested days is too large (DSP).
         elif submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
@@ -106,11 +109,11 @@ def handle_form_submit(request_json):
 
         # Flag Case #3: The student has requested extensions on too many assignments in a single submission
         elif not submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
-            needs_human = f"student requested too many assignment extensions ({num_requests}) in one form submission"
+            needs_human = f"this student has requested more assignment extensions ({num_requests}) than the auto-approve threshold ({Environment.get_auto_approve_assignment_threshold())})"
 
         # Flag Case #4: This extension request is retroactive (the due date is in the past)
         elif assignment_manager.is_retroactive(assignment_id=assignment_id, request_time=submission.get_timestamp()):
-            needs_human = "student requested a retroactive extension on an assignment"
+            needs_human = "tbhis student requested a retroactive extension on an assignment"
 
         # Passed all cases, so proceed.
         else:
@@ -147,7 +150,7 @@ def handle_form_submit(request_json):
         partner.set_status_pending()
         partner.flush()
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work-in-progress for this student's record)."
+            "An extension request needs review (there is work-in-progress for this student's record)."
         )
 
     # Case (2): Submission contains partner, and partner's status is a "work-in-progress"
@@ -158,7 +161,7 @@ def handle_form_submit(request_json):
         student.flush()
 
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work-in-progress for this student's partner)."
+            "An extension request needs review (there is work-in-progress for this student's partner)."
         )
 
     # Case (3): Submission doesn't contain partner, and student's status is a "work-in-progress"
@@ -167,7 +170,7 @@ def handle_form_submit(request_json):
     elif student.has_wip_status():
         student.flush()
         slack.send_student_update(
-            "An extension request could not be auto-approved (there is work in progress for this student)."
+            "An extension request needs review (there is work in progress for this student)."
         )
 
     # Case (4): Student's status (and, if applicable, partner's status) are "clean" - there is no pending
@@ -181,7 +184,7 @@ def handle_form_submit(request_json):
             partner.set_status_pending()
             partner.flush()
 
-        slack.send_student_update(f"An extension request could not be auto-approved (reason: {needs_human}).")
+        slack.send_student_update(f"An extension request needs review ({needs_human}).")
 
     # Case (5): Student's status (and, if applicable, partner's status) are "clean" - and the extension as a whole
     # qualifies for an auto-extension! So we can go ahead and process the extension for the student and the partner.
