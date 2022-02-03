@@ -53,7 +53,9 @@ class AssignmentManager:
         """
         Return true if this extension request was submitted after an assignment was due.
         """
-        request_time = parser.parse(request_time)
+        request_time: datetime = parser.parse(request_time)
+        if request_time.tzinfo is None:
+            request_time = PST.localize(request_time)
         due_date = self.get_due_date(assignment_id=assignment_id)
         due_time = PST.localize(parser.parse(due_date + " 11:59 PM"))
         print(f"Comparing request_time={request_time} to due_time={due_time}")

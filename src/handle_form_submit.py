@@ -113,7 +113,7 @@ def handle_form_submit(request_json):
 
         # Flag Case #4: This extension request is retroactive (the due date is in the past)
         elif assignment_manager.is_retroactive(assignment_id=assignment_id, request_time=submission.get_timestamp()):
-            needs_human = "tbhis student requested a retroactive extension on an assignment"
+            needs_human = "this student requested a retroactive extension on an assignment"
 
         # Passed all cases, so proceed.
         else:
