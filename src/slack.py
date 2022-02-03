@@ -1,11 +1,11 @@
 from typing import List
-from src.assignments import AssignmentManager
+from src.assignments import AssignmentList
 from src.record import StudentRecord
 from src.submission import FormSubmission
 from slack_sdk.webhook import WebhookClient, WebhookResponse
 
 from src.errors import SlackError
-from src.utils import Environment
+from src.utils import Environment, cast_list_str
 from tabulate import tabulate
 
 
@@ -42,12 +42,10 @@ class SlackManager:
         text += "> *Notes*: " + self.submission.get_game_plan() + "\n"
         return text
 
-    def set_current_student(
-        self, submission: FormSubmission, student: StudentRecord, assignment_manager: AssignmentManager
-    ):
+    def set_current_student(self, submission: FormSubmission, student: StudentRecord, assignments: AssignmentList):
         self.submission = submission
         self.student = student
-        self.assignment_manager = assignment_manager
+        self.assignments = assignments
 
     def send_message(self, message: str) -> None:
         for webhook in self.webhooks:
@@ -59,7 +57,7 @@ class SlackManager:
         slack_tags = Environment.safe_get("SLACK_TAG_LIST")
         prefix = ""
         if slack_tags:
-            uids = [row.strip() for row in slack_tags.split(",")]
+            uids = cast_list_str(slack_tags)
             prefix = " ".join([f"<@{uid}>" for uid in uids]) + " "
         return prefix
 
@@ -72,10 +70,10 @@ class SlackManager:
 
         message += "\n"
         rows = []
-        for assignment_id in self.assignment_manager.get_all_ids():
-            num_days = self.student.get_assignment(assignment_id)
+        for assignment in self.assignments:
+            num_days = self.student.get_assignment(assignment.get_id())
             if num_days:
-                rows.append([self.assignment_manager.id_to_name(assignment_id), num_days])
+                rows.append([assignment.get_name(), num_days])
         if len(rows) > 0:
             message += "```"
             message += tabulate(rows)

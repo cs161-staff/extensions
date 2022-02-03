@@ -1,10 +1,9 @@
-from typing import Any, Dict, List
-from urllib import request
-from xmlrpc.client import Boolean
-from src.assignments import AssignmentManager
-from src.errors import ConfigurationError, FormInputError
+from typing import Any, Dict
 
+from src.assignments import AssignmentList
+from src.errors import ConfigurationError, FormInputError
 from src.sheets import Sheet
+from src.utils import cast_list_int, cast_list_str
 
 
 class FormSubmission:
@@ -32,7 +31,7 @@ class FormSubmission:
             if question in form_payload:
                 self.responses[key] = str(form_payload[question][0])
 
-        self.responses['Timestamp'] = form_payload['Timestamp'][0]
+        self.responses["Timestamp"] = form_payload["Timestamp"][0]
         print(self.responses)
 
     def get_timestamp(self) -> str:
@@ -57,14 +56,18 @@ class FormSubmission:
     def get_raw_days(self) -> str:
         return self.responses["days"]
 
-    def get_requests(self, assignment_manager: AssignmentManager) -> Dict[str, Any]:
+    def get_requests(self, assignments: AssignmentList) -> Dict[str, Any]:
         """
         Fetch a map of ID to # days requested.
         """
         try:
-            clean = lambda arr: [str(x).strip() for x in arr]
-            names = clean(self.responses["assignments"].split(","))
-            days = clean(str(self.responses["days"]).split(","))
+            names = cast_list_str(self.responses["assignments"])
+            try:
+                days = cast_list_int(self.responses["days"])
+            except Exception:
+                raise FormInputError(
+                    f'Failed to process student input for # days. Please correct and reprocess. Input: {self.responses["days"]}'
+                )
 
             # A little logic to help with the case where a student selects P1, P1 Checkpoint and asks for "7" days
             # Apply "7" to both P1 and P1 checkpoint
@@ -75,18 +78,12 @@ class FormSubmission:
                 raise FormInputError("# assignment names provided does not equal # days requested for each assignment.")
 
             requests = {}
-            for name, days in zip(names, days):
-                assignment_id = assignment_manager.name_to_id(name)
-                try:
-                    num_days = int(days)
-                except Exception:
-                    raise FormInputError(
-                        f"failed to cast student input for # days to integer (please correct and reprocess): {days}"
-                    )
+            for name, num_days in zip(names, days):
+                assignment = assignments.from_name(name)
                 if num_days <= 0:
                     raise FormInputError("# requested days must be > 0")
 
-                requests[assignment_id] = num_days
+                requests[assignment.get_id()] = num_days
 
             return requests
 

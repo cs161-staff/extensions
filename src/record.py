@@ -1,10 +1,11 @@
 from __future__ import annotations
-from datetime import datetime
 
+from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
-from src.assignments import AssignmentManager
 
-from src.errors import FormInputError, StudentRecordError
+from src.assignments import AssignmentList
+from src.errors import StudentRecordError
+from src.gradescope import Gradescope
 from src.sheets import Sheet
 
 APPROVAL_STATUS_REQUESTED_MEETING = "Requested Meeting"
@@ -18,6 +19,7 @@ EMAIL_STATUS_AUTO_SENT = "Auto Sent"
 EMAIL_STATUS_MANUAL_SENT = "Manually Sent"
 
 from datetime import datetime
+
 from pytz import timezone
 
 PST = timezone("US/Pacific")
@@ -77,9 +79,9 @@ class StudentRecord:
         self._queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
         self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
 
-    def existing_request_count(self, assignment_manager: AssignmentManager) -> Optional[int]:
+    def existing_request_count(self, assignments: AssignmentList) -> Optional[int]:
         count = 0
-        for assignment_id in assignment_manager.get_all_ids():
+        for assignment_id in assignments.get_all_ids():
             if self.get_assignment(assignment_id=assignment_id):
                 count += 1
         return count
@@ -131,6 +133,17 @@ class StudentRecord:
 
                 # Update local table_record object for email.
                 self.table_record[col] = value
+
+    def apply_gradescope_extensions(self, assignments: AssignmentList, gradescope: Gradescope):
+        for assignment in assignments:
+            num_days = self.get_assignment(assignment_id=assignment.get_id())
+            if num_days:
+                for assignment_url in assignment.get_gradescope_assignment_urls():
+                    original = assignment.get_due_date()
+                    extended = original + timedelta(days=int(num_days))
+                    gradescope.apply_extension(
+                        assignment_url=assignment_url, email=self.get_email(), new_due_date=extended
+                    )
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:

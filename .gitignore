@@ -7,3 +7,4 @@ creds.json
 extensions/
 .DS_Store
 .vscode
+.env

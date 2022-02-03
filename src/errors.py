@@ -6,6 +6,10 @@ class SlackError(KnownError):
     pass
 
 
+class GradescopeError(KnownError):
+    pass
+
+
 class SheetError(KnownError):
     pass
 

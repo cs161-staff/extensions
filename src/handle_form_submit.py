@@ -1,19 +1,8 @@
-from enum import auto
-from src import submission
-from src.assignments import AssignmentManager
+from src.assignments import AssignmentList
 from src.email import Email
-from src.errors import ConfigurationError, FormInputError, KnownError
-from src.record import (
-    APPROVAL_STATUS_AUTO_APPROVED,
-    APPROVAL_STATUS_PENDING,
-    APPROVAL_STATUS_REQUESTED_MEETING,
-    EMAIL_STATUS_AUTO_SENT,
-    EMAIL_STATUS_PENDING,
-    StudentRecord,
-)
-from src.slack import SlackManager
-from src.submission import FormSubmission
-from src.utils import Environment
+from src.errors import ConfigurationError, KnownError
+from src.gradescope import Gradescope
+from src.record import StudentRecord
 from src.sheets import (
     SHEET_ASSIGNMENTS,
     SHEET_ENVIRONMENT_VARIABLES,
@@ -21,6 +10,9 @@ from src.sheets import (
     SHEET_STUDENT_RECORDS,
     BaseSpreadsheet,
 )
+from src.slack import SlackManager
+from src.submission import FormSubmission
+from src.utils import Environment
 
 # TODO: What about retroactive extensions?
 
@@ -44,7 +36,7 @@ def handle_form_submit(request_json):
     Environment.configure_env_vars(sheet_env_vars)
 
     # Fetch assignments.
-    assignment_manager = AssignmentManager(sheet=sheet_assignments)
+    assignments = AssignmentList(sheet=sheet_assignments)
 
     # Fetch form submission.
     submission = FormSubmission(form_payload=request_json["form_data"], question_sheet=sheet_form_questions)
@@ -54,7 +46,7 @@ def handle_form_submit(request_json):
 
     # Get a pointer to Slack, and set the current student
     slack = SlackManager()
-    slack.set_current_student(submission=submission, student=student, assignment_manager=assignment_manager)
+    slack.set_current_student(submission=submission, student=student, assignments=assignments)
 
     # -----------------------------------------------------------------------------------------------------------------
     # Section 1: The student submitted a general plea for help.
@@ -80,10 +72,11 @@ def handle_form_submit(request_json):
         print("Attempting to look up partner by email.")
         partner = StudentRecord.from_email(email=submission.get_partner_email(), sheet_records=sheet_records)
 
-    num_requests = len(submission.get_requests(assignment_manager=assignment_manager))
+    num_requests = len(submission.get_requests(assignments=assignments))
 
-    for assignment_id, num_days in submission.get_requests(assignment_manager=assignment_manager).items():
+    for assignment_id, num_days in submission.get_requests(assignments=assignments).items():
         print(f"[{assignment_id}] Processing request for {num_days} days.")
+        assignment = assignments.from_id(assignment_id)
 
         # If student requests new extension that's shorter than previously requested extension, then treat this request
         # as the previously requested extension (this helps us with the case where Partner A requests 8 day ext. and B
@@ -112,12 +105,12 @@ def handle_form_submit(request_json):
             needs_human = f"this student has requested more assignment extensions ({num_requests}) than the auto-approve threshold ({Environment.get_auto_approve_assignment_threshold()})"
 
         # Flag Case #4: This extension request is retroactive (the due date is in the past)
-        elif assignment_manager.is_retroactive(assignment_id=assignment_id, request_time=submission.get_timestamp()):
-            needs_human = "tbhis student requested a retroactive extension on an assignment"
+        elif assignment.is_past_due(request_time=submission.get_timestamp()):
+            needs_human = "this student requested a retroactive extension on an assignment"
 
         # Passed all cases, so proceed.
         else:
-            print(f"[{assignment_id}] Request meets criteria for auto-approval.")
+            print(f"[{assignment_id}] request meets criteria for auto-approval")
 
         # Regardless of whether or not this needs a human, we write the number of days requested back onto the
         # roster sheet (this is in a queue-style format, where we queue up these writes and then batch-process
@@ -125,7 +118,7 @@ def handle_form_submit(request_json):
         student.queue_write_back(col_key=assignment_id, col_value=num_days)
 
         # We do the same for the partner, if this assignment has a partner and the submission has a partner.
-        if assignment_manager.is_partner_assignment(assignment_id) and submission.has_partner():
+        if assignment.is_partner_assignment() and submission.has_partner():
             partner.queue_write_back(col_key=assignment_id, col_value=num_days)
 
         # Aside: if the form submission claims DSP, but the student record isn't marked as DSP, then flag it
@@ -169,9 +162,7 @@ def handle_form_submit(request_json):
     # it as such). But we do want to update the roster with the number of days requested, so we dispatch writes.
     elif student.has_wip_status():
         student.flush()
-        slack.send_student_update(
-            "An extension request needs review (there is work in progress for this student)."
-        )
+        slack.send_student_update("An extension request needs review (there is work in progress for this student).")
 
     # Case (4): Student's status (and, if applicable, partner's status) are "clean" - there is no pending
     # activity in either of these rows, so we can go ahead and check if the extension as a whole qualifies
@@ -193,7 +184,7 @@ def handle_form_submit(request_json):
         def send_email(user: StudentRecord):
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
-                email = Email.from_student_record(student=user, assignment_manager=assignment_manager)
+                email = Email.from_student_record(student=user, assignments=assignments)
                 email.send()
             except Exception as err:
                 raise KnownError(
@@ -219,3 +210,9 @@ def handle_form_submit(request_json):
         send_email(student)
         if partner:
             send_email(partner)
+
+        if Gradescope.extend_gradescope_assignments_enabled():
+            client = Gradescope()
+            student.apply_gradescope_extensions(assignments=assignments, gradescope=client)
+            if partner:
+                partner.apply_gradescope_extensions(assignments=assignments, gradescope=client)

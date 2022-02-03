@@ -1,14 +1,14 @@
 from __future__ import annotations
-import datetime
-from typing import List
-from src.errors import EmailError
 
-from src.utils import Environment
-from src.record import StudentRecord
-from src.assignments import AssignmentManager
-from dateutil import parser
+from datetime import timedelta
+from typing import List
 
 from sicp.common.rpc.mail import send_email
+
+from src.assignments import AssignmentList
+from src.errors import EmailError
+from src.record import StudentRecord
+from src.utils import Environment, cast_list_str
 
 
 class Email:
@@ -32,7 +32,7 @@ class Email:
         self.body = body
 
     @staticmethod
-    def from_student_record(student: StudentRecord, assignment_manager: AssignmentManager) -> Email:
+    def from_student_record(student: StudentRecord, assignments: AssignmentList) -> Email:
         body = f"Hi,"
         body += "\n\n"
         body += (
@@ -43,13 +43,13 @@ class Email:
 
         fmt_date = lambda dt: dt.strftime("%A, %B %-d")
 
-        for assignment_id in assignment_manager.get_all_ids():
-            num_days = student.get_assignment(assignment_id=assignment_id)
+        for assignment in assignments:
+            num_days = student.get_assignment(assignment_id=assignment.get_id())
             if num_days:
-                name = assignment_manager.id_to_name(assignment_id=assignment_id)
+                name = assignment.get_name()
 
-                original = parser.parse(assignment_manager.get_due_date(assignment_id=assignment_id))
-                extended = original + datetime.timedelta(days=int(num_days))
+                original = assignment.get_due_date()
+                extended = original + timedelta(days=int(num_days))
 
                 body += f"{name} ({num_days} Day Extension)" + "\n"
                 body += f"Original Deadline: {fmt_date(original)}" + "\n"
@@ -68,7 +68,7 @@ class Email:
         body += "\n\n"
         body += "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in this thread, and feel free to reply to this thread if you'd like to follow up with us!"
 
-        cc_emails = [email.strip() for email in Environment.safe_get("EMAIL_CC", "").split(",")]
+        cc_emails = cast_list_str(Environment.safe_get("EMAIL_CC", ""))
 
         return Email(
             to_email=student.get_email(),

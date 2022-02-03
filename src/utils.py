@@ -1,7 +1,47 @@
 import os
-from typing import Any, Optional
-from src.errors import ConfigurationError
+from datetime import datetime
+from typing import Any, List, Optional
+
+from dateutil import parser
+from dotenv import dotenv_values
+from pytz import timezone
+
+from src.errors import ConfigurationError, KnownError
 from src.sheets import Sheet
+
+PST = timezone("US/Pacific")
+
+
+def cast_bool(cell: str) -> bool:
+    cell = str(cell).strip()
+    if not (cell == "Yes" or cell == "No"):
+        raise KnownError(f"Boolean cell value was not Yes or No; instead, was {cell}")
+    return cell == "Yes"
+
+
+def cast_date(cell: str, deadline: bool = True) -> datetime:
+    try:
+        cell = str(cell).strip()
+        suffix = " 11:59 PM" if deadline else ""
+        return PST.localize(parser.parse(str(cell) + suffix))
+    except Exception as err:
+        raise KnownError(f"Could not convert cell to date format. Value = {cell}, Error = {err}.")
+
+
+def cast_list_str(cell: str) -> List[str]:
+    cell = str(cell).strip()
+    if cell == "":
+        return []
+    items = [item.strip() for item in cell.split(",")]
+    return items
+
+
+def cast_list_int(cell: str) -> List[int]:
+    cell = str(cell).strip()
+    if cell == "":
+        return []
+    items = [int(item.strip()) for item in str(cell).split(",")]
+    return items
 
 
 class Environment:
@@ -48,3 +88,6 @@ class Environment:
             if not key:
                 continue
             os.environ[key] = str(value)
+
+        os.environ.update(dotenv_values(".env"))
+        # Load local environment variables now from .env, which override remote provided variables for debugging

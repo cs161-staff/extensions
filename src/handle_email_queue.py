@@ -1,16 +1,9 @@
+from src.assignments import AssignmentList
 from src.email import Email
-from src.assignments import AssignmentManager
 from src.errors import ConfigurationError, KnownError
-from src.record import EMAIL_STATUS_AUTO_SENT, EMAIL_STATUS_IN_QUEUE, StudentRecord
-from src.sheets import (
-    SHEET_ASSIGNMENTS,
-    SHEET_ENVIRONMENT_VARIABLES,
-    SHEET_FORM_QUESTIONS,
-    SHEET_STUDENT_RECORDS,
-    BaseSpreadsheet,
-)
+from src.record import EMAIL_STATUS_IN_QUEUE, StudentRecord
+from src.sheets import SHEET_ASSIGNMENTS, SHEET_ENVIRONMENT_VARIABLES, SHEET_STUDENT_RECORDS, BaseSpreadsheet
 from src.slack import SlackManager
-
 from src.utils import Environment
 
 
@@ -28,7 +21,7 @@ def handle_email_queue(request_json):
     Environment.configure_env_vars(sheet_env_vars)
 
     # Fetch assignments.
-    assignment_manager = AssignmentManager(sheet=sheet_assignments)
+    assignments = AssignmentList(sheet=sheet_assignments)
 
     # Fetch all students.
     sent_count = 0
@@ -39,7 +32,7 @@ def handle_email_queue(request_json):
         if student.email_status() == EMAIL_STATUS_IN_QUEUE:
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
-                email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
+                email = Email.from_student_record(student=student, assignments=assignments)
                 emails.append(student.get_email())
                 email.send()
                 student.set_status_email_approved()

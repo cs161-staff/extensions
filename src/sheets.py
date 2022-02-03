@@ -1,9 +1,10 @@
 import os
 from typing import Any, Dict, List, Optional, Tuple
-import gspread
 
-from src.errors import ConfigurationError, KnownError, SheetError
+import gspread
 from gspread.worksheet import Worksheet
+
+from src.errors import SheetError
 
 SHEET_STUDENT_RECORDS = "Roster"
 SHEET_ASSIGNMENTS = "Assignments"

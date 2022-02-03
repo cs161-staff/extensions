@@ -1,7 +1,6 @@
-from src.errors import KnownError
-
 import src.handle_email_queue as handle_email
 import src.handle_form_submit as handle_form
+from src.errors import KnownError
 from src.slack import SlackManager
 
 
@@ -12,7 +11,7 @@ def handle_email_queue(request):
         return {"success": True}
     except KnownError as e:
         print("Known Error Occurred: " + str(e))
-        SlackManager().send_error(str(e) + f' (Request: {request_json})')
+        SlackManager().send_error(str(e) + f" (Request: {request_json})")
         return {"success": False, "error": str(e)}
     except Exception as e:
         # TODO: Send a Slack message.
@@ -27,7 +26,7 @@ def handle_form_submit(request):
     except KnownError as e:
         # TODO: Send a Slack message.
         print("Known Error Occurred: " + str(e))
-        SlackManager().send_error(str(e) + f' (Request: {request_json})')
+        SlackManager().send_error(str(e) + f" (Request: {request_json})")
         return {"success": False, "error": str(e)}
     except Exception as e:
         # TODO: Send a Slack message.

@@ -1,4 +1,16 @@
 {
   "python.formatting.provider": "black",
-  "python.formatting.blackArgs": ["--line-length", "120"]
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "120"
+  ],
+  "files.exclude": {
+    "fullGSapi/": true
+  },
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true,
+    },
+  }
 }
