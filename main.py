@@ -10,11 +10,12 @@ def handle_email_queue(request):
         handle_email.handle_email_queue(request_json=request_json)
         return {"success": True}
     except KnownError as e:
-        print("Known Error Occurred: " + str(e))
+        print("Known Error Occurred: " + str(e) + f" (Request: {request_json})")
         SlackManager().send_error(str(e) + f" (Request: {request_json})")
         return {"success": False, "error": str(e)}
     except Exception as e:
-        # TODO: Send a Slack message.
+        print("Internal Error Occurred: " + str(e) + f" (Request: {request_json})")
+        SlackManager().send_error("Internal error: " + str(e) + f" (Request: {request_json})")
         raise
 
 
@@ -24,10 +25,10 @@ def handle_form_submit(request):
         handle_form.handle_form_submit(request_json=request_json)
         return {"success": True}
     except KnownError as e:
-        # TODO: Send a Slack message.
-        print("Known Error Occurred: " + str(e))
+        print("Known Error Occurred: " + str(e) + f" (Request: {request_json})")
         SlackManager().send_error(str(e) + f" (Request: {request_json})")
         return {"success": False, "error": str(e)}
     except Exception as e:
-        # TODO: Send a Slack message.
+        print("Internal Error Occurred: " + str(e) + f" (Request: {request_json})")
+        SlackManager().send_error("Internal error: " + str(e) + f" (Request: {request_json})")
         raise

@@ -39,6 +39,12 @@ class Sheet:
                 return (i, record)
         return None
 
+    def update_cells(self, cells: List[Any]):
+        gspread_cells: List[gspread.Cell] = []
+        for row, col, value in cells:
+            gspread_cells.append(gspread.Cell(row=row + 2, col=col + 1, value=value))
+        self.sheet.update_cells(gspread_cells, value_input_option="USER_ENTERED")
+
     def update_cell(self, row_index: int, col_index: int, value: Any) -> Dict[str, Any]:
         """
         Note: pass in data-relative row_index and col_index here. This method offsets row_index by two,

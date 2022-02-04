@@ -1,3 +1,5 @@
+from typing import List
+
 from src.assignments import AssignmentList
 from src.email import Email
 from src.errors import ConfigurationError, KnownError
@@ -24,8 +26,7 @@ def handle_email_queue(request_json):
     assignments = AssignmentList(sheet=sheet_assignments)
 
     # Fetch all students.
-    sent_count = 0
-    emails = []
+    emails: List[str] = []
 
     for i, table_record in enumerate(sheet_records.get_all_records()):
         student = StudentRecord(table_index=i, table_record=table_record, sheet=sheet_records)
@@ -33,11 +34,10 @@ def handle_email_queue(request_json):
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
                 email = Email.from_student_record(student=student, assignments=assignments)
-                emails.append(student.get_email())
                 email.send()
                 student.set_status_email_approved()
                 student.flush()
-                sent_count += 1
+                emails.append(student.get_email())
             except Exception as err:
                 raise KnownError(
                     f"Attempted to send an email to {student.get_email()}, but failed.\n"
@@ -52,5 +52,5 @@ def handle_email_queue(request_json):
         slack.send_message("Sent zero emails from the queue...was it empty?")
     else:
         slack.send_message(
-            f"Sent {sent_count} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"
+            f"Sent {len(emails)} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"
         )

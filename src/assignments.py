@@ -12,6 +12,10 @@ PST = timezone("US/Pacific")
 
 
 class Assignment:
+    """
+    An instance of an assignment, created from a user-provided list of assignments.
+    """
+
     def __init__(self, name: str, id: str, due_date: datetime, partner: bool, gradescope: List[str]) -> None:
         self.name = name
         self.id = id
@@ -23,8 +27,9 @@ class Assignment:
         """
         Return true if this extension request was submitted after an assignment was due.
         """
-        request_time = parser.parse(request_time)
-        print(f"Comparing request_time={request_time} to due_time={self.due_date}")
+        request_time: datetime = parser.parse(request_time)
+        if request_time.tzinfo is None:
+            request_time = PST.localize(request_time)
         if request_time > self.due_date:
             return True
         else:
@@ -47,10 +52,14 @@ class Assignment:
 
 
 class AssignmentList:
+    """
+    A list of assignments, created from the user-provided "Assignments" sheet. Supports assignment lookup by name/id.
+    """
+
     def __init__(self, sheet: Sheet) -> None:
         assignments: List[Assignment] = []
         for row in sheet.get_all_records():
-            name = row.get("name")
+            name = row["name"]
             if name:
                 assignments.append(
                     Assignment(

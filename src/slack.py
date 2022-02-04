@@ -1,12 +1,13 @@
 from typing import List
+
+from slack_sdk.webhook import WebhookClient, WebhookResponse
+from tabulate import tabulate
+
 from src.assignments import AssignmentList
+from src.errors import SlackError
 from src.record import StudentRecord
 from src.submission import FormSubmission
-from slack_sdk.webhook import WebhookClient, WebhookResponse
-
-from src.errors import SlackError
 from src.utils import Environment, cast_list_str
-from tabulate import tabulate
 
 
 class SlackManager:
@@ -18,10 +19,14 @@ class SlackManager:
         self.webhooks: List[WebhookClient] = []
         self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT")))
         self.warnings = []
+        self.silent = False
 
         if Environment.contains("SLACK_ENDPOINT_DEBUG"):
             if Environment.get("SLACK_ENDPOINT_DEBUG") != Environment.get("SLACK_ENDPOINT"):
                 self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT_DEBUG")))
+
+    def suppress(self):
+        self.silent = True
 
     def add_warning(self, warning: str):
         if warning not in self.warnings:
@@ -48,6 +53,10 @@ class SlackManager:
         self.assignments = assignments
 
     def send_message(self, message: str) -> None:
+        if self.silent:
+            print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
+            return
+
         for webhook in self.webhooks:
             response = webhook.send(text=message)
             self.check_error(response)
@@ -71,7 +80,7 @@ class SlackManager:
         message += "\n"
         rows = []
         for assignment in self.assignments:
-            num_days = self.student.get_assignment(assignment.get_id())
+            num_days = self.student.get_request(assignment.get_id())
             if num_days:
                 rows.append([assignment.get_name(), num_days])
         if len(rows) > 0:
@@ -86,6 +95,10 @@ class SlackManager:
             for w in self.warnings:
                 message += w + "\n"
             message += "```"
+
+        if self.silent:
+            print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
+            return
 
         if autoapprove:
             for webhook in self.webhooks:

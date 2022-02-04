@@ -4,6 +4,9 @@
     "--line-length",
     "120"
   ],
+  "python.analysis.extraPaths": [
+    "/Users/shomil/Documents/github/cs161-staff/notebook/gradescope-api/src/"
+  ],
   "files.exclude": {
     "fullGSapi/": true
   },
@@ -12,5 +15,8 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": true,
     },
-  }
+  },
+  "editor.rulers": [
+    120
+  ]
 }

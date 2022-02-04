@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
+from pytz import timezone
+
 from src.assignments import AssignmentList
 from src.errors import StudentRecordError
 from src.gradescope import Gradescope
@@ -11,16 +13,10 @@ from src.sheets import Sheet
 APPROVAL_STATUS_REQUESTED_MEETING = "Requested Meeting"
 APPROVAL_STATUS_PENDING = "Pending"
 APPROVAL_STATUS_AUTO_APPROVED = "Auto Approved"
-APPROVAL_STATUS_MANUAL_APPROVED = "Manually Approved"
 
 EMAIL_STATUS_PENDING = "Pending Approval"
 EMAIL_STATUS_IN_QUEUE = "In Queue"
 EMAIL_STATUS_AUTO_SENT = "Auto Sent"
-EMAIL_STATUS_MANUAL_SENT = "Manually Sent"
-
-from datetime import datetime
-
-from pytz import timezone
 
 PST = timezone("US/Pacific")
 
@@ -79,14 +75,7 @@ class StudentRecord:
         self._queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
         self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
 
-    def existing_request_count(self, assignments: AssignmentList) -> Optional[int]:
-        count = 0
-        for assignment_id in assignments.get_all_ids():
-            if self.get_assignment(assignment_id=assignment_id):
-                count += 1
-        return count
-
-    def get_assignment(self, assignment_id: str) -> Optional[int]:
+    def get_request(self, assignment_id: str) -> Optional[int]:
         try:
             result = str(self.table_record[assignment_id])
             result = result.strip()
@@ -101,11 +90,6 @@ class StudentRecord:
                 + f"Error: {err}"
             )
 
-    def has_existing_request(self, assignment_id: str):
-        if self.get_assignment(assignment_id=assignment_id):
-            return True
-        return False
-
     def queue_write_back(self, col_key: str, col_value: Any) -> Optional[str]:
         self.write_queue[col_key] = col_value
 
@@ -116,34 +100,33 @@ class StudentRecord:
             self.write_queue["last_updated"] = last_updated
 
         if self.table_index == -1:
-            print("Flushing student record, adding new row.")
             values = [self.write_queue.get(header) for header in headers]
-            self.sheet.sheet.append_row(values=values)
+            self.sheet.sheet.append_row(values=values, value_input_option="USER_ENTERED")
 
             # Update local table_record object for email.
             for col, value in self.write_queue.items():
                 self.table_record[col] = value
 
         else:
-            print("Flushing student record, updating existing row.")
+            cells = []
             for col, value in self.write_queue.items():
                 row_index = self.table_index
                 col_index = headers.index(col)
-                self.sheet.update_cell(row_index=row_index, col_index=col_index, value=value)
+                cells.append([row_index, col_index, value])
 
                 # Update local table_record object for email.
                 self.table_record[col] = value
+            self.sheet.update_cells(cells=cells)
 
-    def apply_gradescope_extensions(self, assignments: AssignmentList, gradescope: Gradescope):
+    def apply_extensions(self, assignments: AssignmentList, gradescope: Gradescope):
         for assignment in assignments:
-            num_days = self.get_assignment(assignment_id=assignment.get_id())
+            num_days = self.get_request(assignment_id=assignment.get_id())
             if num_days:
-                for assignment_url in assignment.get_gradescope_assignment_urls():
-                    original = assignment.get_due_date()
-                    extended = original + timedelta(days=int(num_days))
-                    gradescope.apply_extension(
-                        assignment_url=assignment_url, email=self.get_email(), new_due_date=extended
-                    )
+                gradescope.apply_extension(
+                    assignment_urls=assignment.get_gradescope_assignment_urls(),
+                    email=self.get_email(),
+                    new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
+                )
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:
