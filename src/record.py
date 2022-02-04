@@ -65,8 +65,9 @@ class StudentRecord:
         self._queue_email_status("")
 
     def set_status_pending(self):
-        self._queue_approval_status(APPROVAL_STATUS_PENDING)
-        self._queue_email_status(EMAIL_STATUS_PENDING)
+        if self.approval_status() != APPROVAL_STATUS_REQUESTED_MEETING:
+            self._queue_approval_status(APPROVAL_STATUS_PENDING)
+            self._queue_email_status(EMAIL_STATUS_PENDING)
 
     def set_status_email_approved(self):
         self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
@@ -101,7 +102,7 @@ class StudentRecord:
 
         if self.table_index == -1:
             values = [self.write_queue.get(header) for header in headers]
-            self.sheet.sheet.append_row(values=values, value_input_option="USER_ENTERED")
+            self.sheet.append_row(values=values, value_input_option="USER_ENTERED")
 
             # Update local table_record object for email.
             for col, value in self.write_queue.items():

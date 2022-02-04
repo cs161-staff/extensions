@@ -55,6 +55,9 @@ class Sheet:
         col = col_index + 1
         self.sheet.update_cell(row, col, value)
 
+    def append_row(self, values: List[Any], value_input_option: str):
+        self.sheet.append_row(values=values, value_input_option=value_input_option)
+
 
 class BaseSpreadsheet:
     """

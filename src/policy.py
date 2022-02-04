@@ -53,19 +53,22 @@ class Policy:
             self.slack.send_student_update("A student requested a student support meeting.")
             return
 
-        # Step 2: Check to see if there's any existing "work-in-progress" that might block auto-approval.
-        work_in_progress = self.check_work_in_progress()
-        if work_in_progress:
-            self.slack.send_student_update(work_in_progress)
-            return
-
-        # Step 3: Inspect the submission, and determine if it requires manual approval.
+        # Step 2: Inspect the submission, and determine if it requires manual approval.
+        # This step also pipes form submission data into the roster spreadsheet.
         needs_human = self.process_submission()
         if needs_human:
             self.slack.send_student_update(f"An extension request needs review ({needs_human}).")
             return
 
+        # Step 3: Check to see if there's any existing "work-in-progress" that might block auto-approval.
+        # This makes sure we don't auto-approve rows that are marked as "Pending" already.
+        work_in_progress = self.check_work_in_progress()
+        if work_in_progress:
+            self.slack.send_student_update(work_in_progress)
+            return
+
         # Step 4: Before we approve, add anything that we may want to bring to the reviewer's attention.
+        # We add all warnings to the bottom of the Slack message.
         self.check_for_warnings()
 
         # Step 5: All checks have passed, so auto-approve the extension request!
