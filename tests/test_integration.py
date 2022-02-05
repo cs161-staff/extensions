@@ -2,6 +2,9 @@ from email.mime import base
 from typing import Any, Dict
 
 import gspread
+import pytest
+from src.assignments import AssignmentList
+from src.errors import KnownError
 from src.policy import Policy
 from src.sheets import (
     SHEET_ASSIGNMENTS,
@@ -77,21 +80,58 @@ class TestIntegration:
         return policy
 
     #########################################################################################################
-    # AUTO APPROVALS: The following rows should all be auto-approved.
+    # [Z] REQUESTED MEETING: Try a "Requested Meeting" request
+    #########################################################################################################
+    def test_requested_meeting(self):
+        policy = self.get_policy(
+            mock_request={
+                "sid": "123456",
+                "email": "Z1@berkeley.edu",
+                "knows_assignments": "No",
+                "has_partner": "",
+                "game_plan": "I need to meet with a TA to figure out my situation.",
+                "ignore": "",
+            },
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_requested_meeting_existing_work(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="Z2@berkeley.edu", assignments="Homework 1", days="1"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == True
+
+        policy = self.get_policy(
+            mock_request={
+                "sid": "123456",
+                "email": "Z2@berkeley.edu",
+                "knows_assignments": "No",
+                "has_partner": "",
+                "game_plan": "I need to meet with a TA to figure out my situation.",
+                "ignore": "",
+            },
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    #########################################################################################################
+    # [A] AUTO APPROVALS: The following rows should all be auto-approved.
     #########################################################################################################
     def test_auto_approve_single_student_single_assignment(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="A1@berkeley.edu", assignments="Homework 1", days="1"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     def test_auto_approve_single_student_multiple_assignments(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="A2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     def test_auto_approve_single_student_multiple_assignments_with_partner(self):
         policy = self.get_policy(
@@ -104,14 +144,14 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     def test_auto_approve_dsp_single_assignment(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="A5@berkeley.edu", assignments="Homework 1", days="6", is_dsp="Yes"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     def test_auto_approve_dsp_multiple_assignments(self):
         policy = self.get_policy(
@@ -120,7 +160,7 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     def test_auto_approve_dsp_other_status(self):
         policy = self.get_policy(
@@ -132,29 +172,171 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == True
 
     #########################################################################################################
-    # MANUAL APPROVALS: Retroactive extension requests.
+    # [B] MANUAL APPROVALS: Retroactive extension requests.
     #########################################################################################################
     def test_retroactive_single_student_single_assignment(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="R1@berkeley.edu", assignments="Homework 1", days="1"),
+            mock_request=self.get_request(email="B1@berkeley.edu", assignments="Homework 1", days="1"),
             timestamp="2023-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == False
 
     def test_retroactive_single_student_multiple_assignments(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="R2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
+            mock_request=self.get_request(email="B2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
             timestamp="2023-01-27T20:46:42.125Z",
         )
-        policy.apply(silent=True)
+        assert policy.apply(silent=True) == False
 
     #########################################################################################################
-    # MANUAL APPROVALS: Request # days > allowed # days.
+    # [C] MANUAL APPROVALS: Request # days > allowed # days.
     #########################################################################################################
+    def test_flag_request_too_many_days(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="C1@berkeley.edu", assignments="Homework 1", days="10"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_request_too_many_days_with_partner(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="C1@berkeley.edu",
+                assignments="Project 1 Checkpoint",
+                days="10",
+                has_partner="Yes",
+                partner_email="C1.5@berkeley.edu",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_request_too_many_days_dsp(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="C2@berkeley.edu", assignments="Homework 1", days="10", is_dsp="Yes"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_request_too_many_days_multiple_assignments(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="C3@berkeley.edu", assignments="Homework 1, Homework 2", days="10, 2"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_too_many_submissions_in_one_request(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="C4@berkeley.edu",
+                assignments="Homework 1, Homework 2, Homework 3, Homework 4, Homework 5, Homework 6",
+                days="10",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
 
     #########################################################################################################
-    # MANUAL APPROVALS: Work-in-progress for a student (or partner).
+    # [D] MANUAL APPROVALS: Work-in-progress for a student (or partner).
     #########################################################################################################
+    def test_flag_wip_for_student(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+        policy = self.get_policy(
+            mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 3", days="2"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_wip_for_partner(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="D2@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="D3@berkeley.edu",
+                assignments="Project 1 Checkpoint",
+                days="2",
+                has_partner="Yes",
+                partner_email="D2@berkeley.edu",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    def test_flag_wip_for_student_with_partner(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(email="D4@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="D4@berkeley.edu",
+                assignments="Project 1 Checkpoint",
+                days="2",
+                has_partner="Yes",
+                partner_email="D5@berkeley.edu",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True) == False
+
+    #########################################################################################################
+    # [E] Bad form configuration
+    #########################################################################################################
+    def test_assignment_missing(self):
+        with pytest.raises(KnownError):
+            policy = self.get_policy(
+                mock_request=self.get_request(email="D2@berkeley.edu", assignments="Does Not Exist", days="4,4"),
+                timestamp="2022-01-27T20:46:42.125Z",
+            )
+            policy.apply(silent=True)
+
+    def test_fail_cast_bool(self):
+        with pytest.raises(KnownError):
+            AssignmentList(
+                sheet=MockSheet(
+                    rows=[["Homework 1", "hw1", "2022-02-02", "False"]],
+                    headers=["name", "id", "due_date", "partner"],
+                    sheet=None,
+                ),
+            )
+
+    #########################################################################################################
+    # [F] Bad user inputs
+    #########################################################################################################
+    def test_invalid_num_days(self):
+        with pytest.raises(KnownError):
+            policy = self.get_policy(
+                mock_request=self.get_request(email="D2@berkeley.edu", assignments="Homework 1", days="4,4,8"),
+                timestamp="2022-01-27T20:46:42.125Z",
+            )
+            policy.apply(silent=True)
+
+        with pytest.raises(KnownError):
+            policy = self.get_policy(
+                mock_request=self.get_request(
+                    email="D2@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4,8"
+                ),
+                timestamp="2022-01-27T20:46:42.125Z",
+            )
+            policy.apply(silent=True)
+
+        with pytest.raises(KnownError):
+            policy = self.get_policy(
+                mock_request=self.get_request(email="D2@berkeley.edu", assignments="Homework 1", days="not a number"),
+                timestamp="2022-01-27T20:46:42.125Z",
+            )
+            policy.apply(silent=True)

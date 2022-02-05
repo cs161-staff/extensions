@@ -43,29 +43,35 @@ class Policy:
         # Set up a connection to Slack, so we can stream output there
         self.slack.set_current_student(submission=self.submission, student=self.student, assignments=self.assignments)
 
-    def apply(self, silent: bool = False):
+    def apply(self, silent: bool = False) -> bool:
         if silent:
             self.slack.suppress()
 
+        self.student.set_last_run_timestamp(timestamp=self.submission.get_timestamp())
+        if self.partner:
+            self.partner.set_last_run_timestamp(timestamp=self.submission.get_timestamp())
+
         # Step 1: If this is a request for a student support meeting, exit early.
         if not self.submission.knows_assignments():
+            self.student.set_log(f"requested meeting for reason: {self.submission.get_game_plan()}")
             self.student.set_status_requested_meeting()
             self.slack.send_student_update("A student requested a student support meeting.")
-            return
+            self.student.flush()
+            return False
 
         # Step 2: Inspect the submission, and determine if it requires manual approval.
         # This step also pipes form submission data into the roster spreadsheet.
         needs_human = self.process_submission()
         if needs_human:
             self.slack.send_student_update(f"An extension request needs review ({needs_human}).")
-            return
+            return False
 
         # Step 3: Check to see if there's any existing "work-in-progress" that might block auto-approval.
         # This makes sure we don't auto-approve rows that are marked as "Pending" already.
         work_in_progress = self.check_work_in_progress()
         if work_in_progress:
             self.slack.send_student_update(work_in_progress)
-            return
+            return False
 
         # Step 4: Before we approve, add anything that we may want to bring to the reviewer's attention.
         # We add all warnings to the bottom of the Slack message.
@@ -82,6 +88,8 @@ class Policy:
 
         # TODO: Step 7: If enabled, extend deadlines on Gradescope.
 
+        return True
+
     def check_work_in_progress(self) -> Optional[str]:
         work_in_progress = None
 
@@ -90,6 +98,7 @@ class Policy:
         if self.submission.has_partner() and self.student.has_wip_status():
             self.student.flush()
             self.partner.set_status_pending()
+            self.partner.set_log(f"work-in-progress for form submitter [submitter: {self.student.get_email()}]")
             self.partner.flush()
             work_in_progress = (
                 "An extension request needs review (there is work-in-progress for this student's record)."
@@ -100,6 +109,7 @@ class Policy:
         elif self.submission.has_partner() and self.partner.has_wip_status():
             self.partner.flush()
             self.student.set_status_pending()
+            self.student.set_log(f"work-in-progress for submitter's partner [partner: {self.partner.get_email()}]")
             self.student.flush()
             work_in_progress = (
                 "An extension request needs review (there is work-in-progress for this student's partner)."
@@ -167,9 +177,11 @@ class Policy:
         # If this request needs a human, we update statuses to "pending" and proceed.
         if needs_human:
             self.student.set_status_pending()
+            self.student.set_log(needs_human)
             self.student.flush()
             if self.partner:
                 self.partner.set_status_pending()
+                self.partner.set_log(f"{needs_human} [submitter: {self.student.get_email()}] " + needs_human)
                 self.partner.flush()
 
         return needs_human
@@ -184,12 +196,14 @@ class Policy:
 
     def approve(self):
         self.student.set_status_approved()
+        self.student.set_log("auto-approved")
         self.student.flush()
 
         if not self.partner:
             message = "An extension request was automatically approved!"
         else:
             self.partner.set_status_approved()
+            self.partner.set_log(f"auto-approved [request source: {self.student.get_email()}]")
             self.partner.flush()
             message = "An extension request was automatically approved (for a partner, too!)"
 

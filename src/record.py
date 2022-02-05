@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
+from dateutil.parser import parse
 from pytz import timezone
 
 from src.assignments import AssignmentList
@@ -60,6 +61,10 @@ class StudentRecord:
     def _queue_email_status(self, status: str):
         self.queue_write_back(col_key="email_status", col_value=status)
 
+    def set_log(self, log: str):
+        if "last_run_output" in self.sheet.get_headers():
+            self.queue_write_back(col_key="last_run_output", col_value=log)
+
     def set_status_requested_meeting(self):
         self._queue_approval_status(APPROVAL_STATUS_REQUESTED_MEETING)
         self._queue_email_status("")
@@ -94,11 +99,17 @@ class StudentRecord:
     def queue_write_back(self, col_key: str, col_value: Any) -> Optional[str]:
         self.write_queue[col_key] = col_value
 
+    def set_last_run_timestamp(self, timestamp: str):
+        if "last_run_timestamp" in self.sheet.get_headers():
+            timestamp: datetime = parse(timestamp)
+            if not timestamp.tzinfo:
+                timestamp = PST.localize(timestamp)
+            self.queue_write_back(
+                col_key="last_run_timestamp", col_value=str(timestamp.strftime("%-m/%-d/%Y %H:%M:%S"))
+            )
+
     def flush(self):
         headers = self.sheet.get_headers()
-        if "last_updated" in headers:
-            last_updated = str(PST.localize(datetime.now()).strftime("%Y-%m-%d %H:%M:%S"))
-            self.write_queue["last_updated"] = last_updated
 
         if self.table_index == -1:
             values = [self.write_queue.get(header) for header in headers]

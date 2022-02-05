@@ -22,11 +22,7 @@ class MockSheet:
 
     def __init__(self, rows: List[List[str]], headers: List[str], sheet: Worksheet) -> None:
         self.df = pd.DataFrame(rows, columns=headers)
-        self.headers = headers
-        self.all_values = [headers] + rows
-        self.all_records = []
-        for row in rows:
-            self.all_records.append({key: row[i] for i, key in enumerate(headers)})
+        self.df = self.df.fillna("")
         self.sheet = sheet
 
     @staticmethod
@@ -35,13 +31,16 @@ class MockSheet:
         return MockSheet(rows=rows[1:], headers=rows[0], sheet=sheet)
 
     def get_headers(self) -> List[str]:
-        return self.headers
+        return list(self.df.columns)
 
     def get_all_values(self) -> List[List[Any]]:
-        return self.all_values
+        return [list(self.df.columns)] + self.df.values.tolist()
 
     def get_all_records(self) -> List[Dict[str, Any]]:
-        return self.all_records
+        records = []
+        for _, row in self.df.iterrows():
+            records.append({header: row[header] for header in self.df.columns})
+        return records
 
     def get_record_by_id(self, id_column: str, id_value: str) -> Optional[Tuple[int, Dict[str, Any]]]:
         all_records = self.get_all_records()
@@ -52,9 +51,8 @@ class MockSheet:
 
     def update_cells(self, cells: List[Any]):
         for row, col, value in cells:
-            if col > len(self.df):
-                self.df.append([])
-            self.df.loc[row][self.headers[col]] = value
+            self.df.loc[row][self.df.columns[col]] = value
+        self.df = self.df.fillna("")
 
     def flush(self):
         cells: List[gspread.Cell] = []
@@ -66,3 +64,4 @@ class MockSheet:
 
     def append_row(self, values: List[Any], value_input_option: str):
         self.df.loc[len(self.df)] = values
+        self.df = self.df.fillna("")
