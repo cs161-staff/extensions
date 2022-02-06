@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -44,24 +45,27 @@ def cast_list_int(cell: str) -> List[int]:
     return items
 
 
+shard = str(uuid.uuid4())
+
+
 class Environment:
     @staticmethod
     def contains(key: str) -> bool:
-        return os.getenv(key) is not None and str(os.getenv(key)).strip() != ""
+        return os.getenv(shard + key) is not None and str(os.getenv(shard + key)).strip() != ""
 
     @staticmethod
     def safe_get(key: str, default: str = None) -> Optional[str]:
-        if os.getenv(key):
-            data = str(os.getenv(key)).strip()
+        if os.getenv(shard + key):
+            data = str(os.getenv(shard + key)).strip()
             if data:
                 return data
         return default
 
     @staticmethod
     def get(key: str) -> Any:
-        if not os.getenv(key):
+        if not os.getenv(shard + key):
             raise ConfigurationError("Environment variable not set: " + key)
-        return os.getenv(key)
+        return os.getenv(shard + key)
 
     @staticmethod
     def get_auto_approve_threshold() -> int:
@@ -87,7 +91,9 @@ class Environment:
             value = record.get("value")
             if not key:
                 continue
-            os.environ[key] = str(value)
+            os.environ[shard + key] = str(value)
 
-        os.environ.update(dotenv_values(".env"))
         # Load local environment variables now from .env, which override remote provided variables for debugging
+        if os.path.exists(".env"):
+            for key, value in dotenv_values(".env").items():
+                os.environ[shard + key] = value
