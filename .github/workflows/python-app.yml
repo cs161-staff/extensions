@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, gradescope-extensions ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, gradescope-extensions ]
 
 jobs:
   build:
