@@ -1,18 +1,15 @@
 from __future__ import annotations
 
-import os
 from typing import Any, Dict, List, Optional, Tuple
 
 import gspread
+import pandas as pd
 from gspread.worksheet import Worksheet
-from src.errors import SheetError
 
 SHEET_STUDENT_RECORDS = "Roster"
 SHEET_ASSIGNMENTS = "Assignments"
 SHEET_FORM_QUESTIONS = "Form Questions"
 SHEET_ENVIRONMENT_VARIABLES = "Environment Variables"
-
-import pandas as pd
 
 
 class MockSheet:

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import List
 
 from sicp.common.rpc.mail import send_email
@@ -41,8 +41,8 @@ class Email:
         self.body = body
 
     @classmethod
-    def from_student_record(cls, student: StudentRecord, assignments: AssignmentList) -> BaseEmail:
-        body = f"Hi,"
+    def from_student_record(cls, student: StudentRecord, assignments: AssignmentList):
+        body = "Hi,"
         body += "\n\n"
         body += (
             "You recently requested an extension for an assignment. "
@@ -50,7 +50,8 @@ class Email:
         )
         body += "\n\n"
 
-        fmt_date = lambda dt: dt.strftime("%A, %B %-d")
+        def fmt_date(dt: datetime):
+            return dt.strftime("%A, %B %-d")
 
         for assignment in assignments:
             num_days = student.get_request(assignment_id=assignment.get_id())
@@ -75,7 +76,10 @@ class Email:
         body += "\n\n"
         body += Environment.get(ENV_EMAIL_SIGNATURE)
         body += "\n\n"
-        body += "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in this thread, and feel free to reply to this thread if you'd like to follow up with us!"
+        body += (
+            "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in"
+            + " this thread, and feel free to reply to this thread if you'd like to follow up with us!"
+        )
 
         cc_emails = cast_list_str(Environment.safe_get(ENV_EMAIL_CC, ""))
 

@@ -65,7 +65,8 @@ class FormSubmission:
                 days = cast_list_int(self.responses["days"])
             except Exception:
                 raise FormInputError(
-                    f'Failed to process student input for # days. Please correct and reprocess. Input: {self.responses["days"]}'
+                    "Failed to process student input for # days. Please correct and reprocess. "
+                    + f'Input: {self.responses["days"]}'
                 )
 
             # A little logic to help with the case where a student selects P1, P1 Checkpoint and asks for "7" days

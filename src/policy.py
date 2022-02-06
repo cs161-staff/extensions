@@ -1,6 +1,6 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 
-from src.assignments import Assignment, AssignmentList
+from src.assignments import AssignmentList
 from src.email import Email
 from src.errors import KnownError
 from src.record import StudentRecord
@@ -140,23 +140,27 @@ class Policy:
         # Walk through each extension request contained within this form submission.
         for assignment, num_days in self.submission.get_requests():
 
-            # If student requests new extension that's shorter than previously requested extension, then treat this request
-            # as the previously requested extension (this helps us with the case where Partner A requests 8 day ext. and B
-            # requests 3 day ext.) In all other cases (e.g. if new request is longer than old one), we treat it as a normal
-            # request and overwrite the existing record.
+            # If student requests new extension that's shorter than previously requested extension, then treat this
+            # request as the previously requested extension (this helps us with the case where Partner A requests 8
+            # day ext. and B requests 3 day ext.) In all other cases (e.g. if new request is longer than old one), we
+            # treat it as a normal request and overwrite the existing record.
             existing_request = self.student.get_request(assignment_id=assignment.get_id())
             if existing_request and num_days <= existing_request:
                 self.slack.add_warning(
-                    f"[{assignment.get_name()}] student requested an extension for {num_days} days, which was <= an existing request of {existing_request} days, so we kept the existing request in-place."
+                    f"[{assignment.get_name()}] student requested an extension for {num_days} days, which "
+                    + "was <= an existing request of {existing_request} days, so we kept the existing request in-place."
                 )
                 num_days = existing_request
 
             # Flag Case #1: The number of requested days is too large (non-DSP).
             if not self.submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold():
                 if Environment.get_auto_approve_threshold() <= 0:
-                    needs_human = f"auto-approve is disabled"
+                    needs_human = "auto-approve is disabled"
                 else:
-                    needs_human = f"a request of {num_days} days is greater than auto-approve threshold of {Environment.get_auto_approve_threshold()} days"
+                    needs_human = (
+                        f"a request of {num_days} days is greater than auto-approve threshold "
+                        + "of {Environment.get_auto_approve_threshold()} days"
+                    )
 
             # Flag Case #2: The number of requested days is too large (DSP).
             elif self.submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():

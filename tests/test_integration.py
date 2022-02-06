@@ -1,4 +1,3 @@
-from email.mime import base
 from typing import Any, Dict
 
 import gspread
@@ -14,7 +13,6 @@ from src.sheets import (
     BaseSpreadsheet,
 )
 from src.slack import SlackManager
-from src.utils import Environment
 
 from tests.MockSheet import MockSheet
 
@@ -94,14 +92,14 @@ class TestIntegration:
             },
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_requested_meeting_existing_work(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="Z2@berkeley.edu", assignments="Homework 1", days="1"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
         policy = self.get_policy(
             mock_request={
@@ -114,7 +112,7 @@ class TestIntegration:
             },
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     #########################################################################################################
     # [A] AUTO APPROVALS: The following rows should all be auto-approved.
@@ -124,14 +122,14 @@ class TestIntegration:
             mock_request=self.get_request(email="A1@berkeley.edu", assignments="Homework 1", days="1"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     def test_auto_approve_single_student_multiple_assignments(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="A2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     def test_auto_approve_single_student_multiple_assignments_with_partner(self):
         policy = self.get_policy(
@@ -144,14 +142,14 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     def test_auto_approve_dsp_single_assignment(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="A5@berkeley.edu", assignments="Homework 1", days="6", is_dsp="Yes"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     def test_auto_approve_dsp_multiple_assignments(self):
         policy = self.get_policy(
@@ -160,7 +158,7 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     def test_auto_approve_dsp_other_status(self):
         policy = self.get_policy(
@@ -172,7 +170,7 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == True
+        assert policy.apply(silent=True)
 
     #########################################################################################################
     # [B] MANUAL APPROVALS: Retroactive extension requests.
@@ -182,14 +180,14 @@ class TestIntegration:
             mock_request=self.get_request(email="B1@berkeley.edu", assignments="Homework 1", days="1"),
             timestamp="2023-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_retroactive_single_student_multiple_assignments(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="B2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
             timestamp="2023-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     #########################################################################################################
     # [C] MANUAL APPROVALS: Request # days > allowed # days.
@@ -199,7 +197,7 @@ class TestIntegration:
             mock_request=self.get_request(email="C1@berkeley.edu", assignments="Homework 1", days="10"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_request_too_many_days_with_partner(self):
         policy = self.get_policy(
@@ -212,21 +210,21 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_request_too_many_days_dsp(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="C2@berkeley.edu", assignments="Homework 1", days="10", is_dsp="Yes"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_request_too_many_days_multiple_assignments(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="C3@berkeley.edu", assignments="Homework 1, Homework 2", days="10, 2"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_too_many_submissions_in_one_request(self):
         policy = self.get_policy(
@@ -237,7 +235,7 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     #########################################################################################################
     # [D] MANUAL APPROVALS: Work-in-progress for a student (or partner).
@@ -247,20 +245,20 @@ class TestIntegration:
             mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
         policy = self.get_policy(
             mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 3", days="2"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_wip_for_partner(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="D2@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
         policy = self.get_policy(
             mock_request=self.get_request(
@@ -272,14 +270,14 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     def test_flag_wip_for_student_with_partner(self):
         policy = self.get_policy(
             mock_request=self.get_request(email="D4@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
         policy = self.get_policy(
             mock_request=self.get_request(
@@ -291,7 +289,7 @@ class TestIntegration:
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
-        assert policy.apply(silent=True) == False
+        assert not policy.apply(silent=True)
 
     #########################################################################################################
     # [E] Bad form configuration
