@@ -1,6 +1,6 @@
 # Getting Started
 
-If you'd like us to walk you through setup, feel free to email shomil@berkeley.edu or join the `#161-software-support` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like!
+If you'd like us to walk you through setup, feel free to email shomil@berkeley.edu or join the `#161-extension-bot` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like!
 
 It takes ~15 minutes to onboard your class onto this tool, and that time pays off as soon as your first extension requests start rolling in :)
 
@@ -71,3 +71,14 @@ The `name` and `sid` columns are optional - feel free to delete them if you don'
 13. Finally, configure Environment Variables as desired - instructions are within the sheet! This is where you should paste your `SLACK_ENDPOINT` .
     - The `SLACK_ENDPOINT_DEBUG` webhook is an optional configuration variable: it pipes all debug logs to a CS 161 internal Slack channel. Feel free to delete this row after your system is up and running!
     - The `EMAIL_FROM` field can be any email, but it should be formatted as "Sender Name <some-email@berkeley.edu>".
+
+### Part 3: Configuring Gradescope (Optional)
+
+*Estimated Time: 5 minutes*
+
+If you'd like your approved extensions to be reflected in Gradescope (using the assignment "extensions" feature), you'll need to configure a staff API account.
+
+14. Add `cs000-staff+api@berkeley.edu` (or another email address - typically an alias of your SPA email address) as an instructor to the current semester's Gradescope course.
+15. Sign in with that email (reset your password if you don't recieve an email from Gradescope when you're added).
+16. Paste the email/password combination in the `GRADESCOPE_EMAIL` and `GRADESCOPE_PASSWORD` environment variables.
+17. Add one or more comma-separated Gradescope assignment URL's to each assignment under the `gradescope` column of the "Assignments" sheet.

@@ -11,6 +11,7 @@ At a high level, this pipeline consists of:
   - Process form data in combination with a student's "record" (which includes DSP status and prior extension requests) to enter either an auto-approval or manual-approval flow.
   - Sends updates to staff through a **Slack Webhook**, enabling simple internal discussion of student cases through Slack threads.
   - Sends updates to students through the **CS 162 Mailserver** via **CS 61A's RPC Interface**.
+  - Optionally publishes assignment extensions to one or more **Gradescope** assignments.
 
 # Background
 
@@ -55,6 +56,9 @@ Students request an extension through a Google Form (see an example [here](https
 **If a student's a DSP student with an accommodation for assignment extensions,** they can declare that on the form. (We recommend that all students who fall under this category receive auto-approvals for extension requests fewer than 7 days.)
 
 **When a student's request has been approved (either manually or automatically),** students receive a templated email with their updated assignment deadlines. ![image-20220127094604714](README.assets/image-20220127094604714.png)
+
+**If a class has enabled Gradescope extensions,** students will see extensions reflected in Gradescope automatically after they recieve the email with their updated deadlines, as seen below. This works for one or multiple Gradescope assignments per in-class assignment (so if you have one assignment for code and one for a written PDF, then you can paste both assignment URL's into the `Assignments` tab of the master spreadsheet, and the tool will create extensions on both Gradescope assignments).
+![image-20220207124800646](README.assets/image-20220207124800646.png)
 
 ...and that's it for students!
 
@@ -115,6 +119,8 @@ When an error occurs, staff should:
 ![image-20220127110739789](README.assets/image-20220127110739789.png)
 
 If, during a student meeting (or through some other channel, like a Piazza post), staff would like to grant a student an extension on an assignment, staff should enter the number of days to extend the assignment by directly onto the student record on the **Roster**, and throw the student record in the queue for outbound emails. This is a natural "form bypass" case, where a form submission isn't required to grant a student an extension, but these specially-granted extensions are still tracked alongside the rest of the student's extension requests.
+
+---
 
 # Configuration
 

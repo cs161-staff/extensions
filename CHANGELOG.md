@@ -2,6 +2,14 @@
 
 Note: for the latest "state" of the template spreadsheet, see [here](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit#gid=288250820). This may be especially helpful when specifying environment variables.
 
+### 2022-02-07
+
+- **[refactor]** Significantly refactored the internal base.
+- **[fix]** Fixed a bug that was causing environment variables to be shared across classes (which was resulting in weird behavior with the `SLACK_TAG_LIST` environment variable specifically).
+- **[feature]** Added support for Gradescope extensions. See the template for how to configure this feature.
+- **[feature]** Added two optional columns to the Roster sheet: `last_run_output` and `last_run_timestamp` . If these are set, they will be auto-filled with helpful information from each run when new form submissions are processed.
+- **[refactor]** Added signfiicant integration testing.
+
 ### 2022-01-31
 
 - **[update]** Slightly tweaked the wording of Slack messages to make them more approval-friendly  ("An extension request needs review" vs. "An extension request could not be auto-approved").
