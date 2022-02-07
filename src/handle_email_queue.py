@@ -1,16 +1,12 @@
-from src.email import Email
-from src.assignments import AssignmentManager
-from src.errors import ConfigurationError, KnownError
-from src.record import EMAIL_STATUS_AUTO_SENT, EMAIL_STATUS_IN_QUEUE, StudentRecord
-from src.sheets import (
-    SHEET_ASSIGNMENTS,
-    SHEET_ENVIRONMENT_VARIABLES,
-    SHEET_FORM_QUESTIONS,
-    SHEET_STUDENT_RECORDS,
-    BaseSpreadsheet,
-)
-from src.slack import SlackManager
+from typing import List
 
+from src.assignments import AssignmentList
+from src.email import Email
+from src.errors import ConfigurationError, KnownError
+from src.gradescope import Gradescope
+from src.record import EMAIL_STATUS_IN_QUEUE, StudentRecord
+from src.sheets import SHEET_ASSIGNMENTS, SHEET_ENVIRONMENT_VARIABLES, SHEET_STUDENT_RECORDS, BaseSpreadsheet
+from src.slack import SlackManager
 from src.utils import Environment
 
 
@@ -28,23 +24,21 @@ def handle_email_queue(request_json):
     Environment.configure_env_vars(sheet_env_vars)
 
     # Fetch assignments.
-    assignment_manager = AssignmentManager(sheet=sheet_assignments)
+    assignments = AssignmentList(sheet=sheet_assignments)
 
     # Fetch all students.
-    sent_count = 0
-    emails = []
+    emails: List[str] = []
 
     for i, table_record in enumerate(sheet_records.get_all_records()):
         student = StudentRecord(table_index=i, table_record=table_record, sheet=sheet_records)
         if student.email_status() == EMAIL_STATUS_IN_QUEUE:
             # Guard around the outbound email, so we can diagnose errors easily and keep state consistent.
             try:
-                email = Email.from_student_record(student=student, assignment_manager=assignment_manager)
-                emails.append(student.get_email())
+                email = Email.from_student_record(student=student, assignments=assignments)
                 email.send()
                 student.set_status_email_approved()
                 student.flush()
-                sent_count += 1
+                emails.append(student.get_email())
             except Exception as err:
                 raise KnownError(
                     f"Attempted to send an email to {student.get_email()}, but failed.\n"
@@ -54,10 +48,22 @@ def handle_email_queue(request_json):
                     + str(err)
                 )
 
+            if Gradescope.is_enabled():
+                try:
+                    client = Gradescope()
+                    student.apply_extensions(assignments=assignments, gradescope=client)
+                except Exception as err:
+                    raise KnownError(
+                        f"Attempted to extend Gradescope assignments for {student.get_email()}, but failed.\n"
+                        + "Please extend this student's assignments manually.\n"
+                        + "Error: "
+                        + str(err)
+                    )
+
     slack = SlackManager()
     if len(emails) == 0:
         slack.send_message("Sent zero emails from the queue...was it empty?")
     else:
         slack.send_message(
-            f"Sent {sent_count} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"
+            f"Sent {len(emails)} emails from the queue. Emails: " + "\n" + "```" + "\n".join(emails) + "\n" + "```"
         )

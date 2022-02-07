@@ -1,4 +1,4 @@
-.env
+.coverage
 .ipynb_checkpoints/
 *.ipynb
 *.pyc
@@ -8,3 +8,4 @@ creds.json
 extensions/
 .DS_Store
 .vscode
+.env*

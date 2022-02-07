@@ -1,4 +1,27 @@
 {
   "python.formatting.provider": "black",
-  "python.formatting.blackArgs": ["--line-length", "120"]
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "120"
+  ],
+  "python.analysis.extraPaths": [
+    "/Users/shomil/Documents/github/cs161-staff/notebook/gradescope-api/src/"
+  ],
+  "files.exclude": {
+    "fullGSapi/": true
+  },
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true,
+    },
+  },
+  "editor.rulers": [
+    120
+  ],
+  "python.linting.flake8Enabled": true,
+  "python.linting.enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=120",
+  ],
 }

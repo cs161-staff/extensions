@@ -1,39 +1,49 @@
 from __future__ import annotations
-import datetime
-from typing import List
-from src.errors import EmailError
 
-from src.utils import Environment
-from src.record import StudentRecord
-from src.assignments import AssignmentManager
-from dateutil import parser
+import os
+from datetime import datetime, timedelta
+from typing import List
 
 from sicp.common.rpc.mail import send_email
+
+from src.assignments import AssignmentList
+from src.errors import EmailError, KnownError
+from src.record import StudentRecord
+from src.utils import Environment, cast_list_str
+
+ENV_EMAIL_FROM = "EMAIL_FROM"
+ENV_EMAIL_REPLY_TO = "EMAIL_REPLY_TO"
+ENV_EMAIL_SUBJECT = "EMAIL_SUBJECT"
+ENV_EMAIL_SIGNATURE = "EMAIL_SIGNATURE"
+ENV_EMAIL_CC = "EMAIL_CC"
+ENV_APP_MASTER_SECRET = "APP_MASTER_SECRET"
 
 
 class Email:
     """
-    A class that enables creating, previewing, and sending emails. Email configuration data is stored in
-    environment variables (this class is currently set up to use the 162 mail relay system.)
+    An interface for generating and sending templated emails via a preferred client (e.g. CS 162 Mailserver, SendGrid,
+    Mailgun, etc.) - this is designed as an interface in case we need to switch away from CS 162's infra at any point.
     """
 
     def __init__(
         self,
         to_email: str,
         from_email: List[str],
+        reply_to_email: str,
         cc_emails: List[str],
         subject: str,
         body: str,
     ) -> None:
         self.to_email = to_email
         self.from_email = from_email
+        self.reply_to_email = reply_to_email
         self.cc_emails = cc_emails
         self.subject = subject
         self.body = body
 
-    @staticmethod
-    def from_student_record(student: StudentRecord, assignment_manager: AssignmentManager) -> Email:
-        body = f"Hi,"
+    @classmethod
+    def from_student_record(cls, student: StudentRecord, assignments: AssignmentList):
+        body = "Hi,"
         body += "\n\n"
         body += (
             "You recently requested an extension for an assignment. "
@@ -41,15 +51,16 @@ class Email:
         )
         body += "\n\n"
 
-        fmt_date = lambda dt: dt.strftime("%A, %B %-d")
+        def fmt_date(dt: datetime):
+            return dt.strftime("%A, %B %-d")
 
-        for assignment_id in assignment_manager.get_all_ids():
-            num_days = student.get_assignment(assignment_id=assignment_id)
+        for assignment in assignments:
+            num_days = student.get_request(assignment_id=assignment.get_id())
             if num_days:
-                name = assignment_manager.id_to_name(assignment_id=assignment_id)
+                name = assignment.get_name()
 
-                original = parser.parse(assignment_manager.get_due_date(assignment_id=assignment_id))
-                extended = original + datetime.timedelta(days=int(num_days))
+                original = assignment.get_due_date()
+                extended = original + timedelta(days=int(num_days))
 
                 body += f"{name} ({num_days} Day Extension)" + "\n"
                 body += f"Original Deadline: {fmt_date(original)}" + "\n"
@@ -64,17 +75,21 @@ class Email:
         body += "\n\n"
         body += "Best,"
         body += "\n\n"
-        body += Environment.get("EMAIL_SIGNATURE")
+        body += Environment.get(ENV_EMAIL_SIGNATURE)
         body += "\n\n"
-        body += "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in this thread, and feel free to reply to this thread if you'd like to follow up with us!"
+        body += (
+            "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in"
+            + " this thread, and feel free to reply to this thread if you'd like to follow up with us!"
+        )
 
-        cc_emails = [email.strip() for email in Environment.safe_get("EMAIL_CC", "").split(",")]
+        cc_emails = cast_list_str(Environment.safe_get(ENV_EMAIL_CC, ""))
 
-        return Email(
+        return cls(
             to_email=student.get_email(),
-            from_email=Environment.get("EMAIL_FROM"),
+            from_email=Environment.get(ENV_EMAIL_FROM),
             cc_emails=cc_emails,
-            subject=Environment.get("EMAIL_SUBJECT"),
+            reply_to_email=Environment.get(ENV_EMAIL_REPLY_TO),
+            subject=Environment.get(ENV_EMAIL_SUBJECT),
             body=body,
         )
 
@@ -82,34 +97,25 @@ class Email:
         # TODO: When 162 adds HTML support, bring back HTML emails.
         # html_body = Markdown().convert(self.body)
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
-        extra_headers = [("Reply-To", Environment.get("EMAIL_REPLY_TO"))]
+        extra_headers = [("Reply-To", self.reply_to_email)]
         if self.cc_emails:
             header = ("Cc", ", ".join(self.cc_emails))
-            print(header)
             extra_headers.append(header)
 
-        sender = Environment.get("EMAIL_FROM")
-
+        if not os.environ.get(ENV_APP_MASTER_SECRET):
+            raise KnownError(
+                "Internal error: environment master secret not set, so cannot send emails via the CS 162 mailserver!"
+            )
         try:
-            if Environment.contains("APP_MASTER_SECRET"):
-                send_email(
-                    sender=sender,
-                    target=self.to_email,
-                    targets=self.cc_emails,
-                    subject=self.subject,
-                    body=self.body,
-                    _impersonate="mail",
-                    extra_headers=extra_headers,
-                )
-            else:
-                print("Assuming debug mode, since no APP_MASTER_SECRET.")
-                print("Sender:", sender)
-                print("To:", self.to_email)
-                print("Targets:", self.cc_emails)
-                print("Subject:", self.subject)
-                print("Extra Headers:", extra_headers)
-                print("Body:", self.body)
+            send_email(
+                sender=Environment.get(ENV_EMAIL_FROM),
+                target=self.to_email,
+                targets=self.cc_emails,
+                subject=self.subject,
+                body=self.body,
+                _impersonate="mail",
+                extra_headers=extra_headers,
+            )
 
         except Exception as e:
-            print(self.body)
             raise EmailError("An error occurred while sending an email:", e)

@@ -1,12 +1,13 @@
 from typing import List
-from src.assignments import AssignmentManager
+
+from slack_sdk.webhook import WebhookClient, WebhookResponse
+from tabulate import tabulate
+
+from src.assignments import AssignmentList
+from src.errors import SlackError
 from src.record import StudentRecord
 from src.submission import FormSubmission
-from slack_sdk.webhook import WebhookClient, WebhookResponse
-
-from src.errors import SlackError
-from src.utils import Environment
-from tabulate import tabulate
+from src.utils import Environment, cast_list_str
 
 
 class SlackManager:
@@ -18,10 +19,14 @@ class SlackManager:
         self.webhooks: List[WebhookClient] = []
         self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT")))
         self.warnings = []
+        self.silent = False
 
         if Environment.contains("SLACK_ENDPOINT_DEBUG"):
             if Environment.get("SLACK_ENDPOINT_DEBUG") != Environment.get("SLACK_ENDPOINT"):
                 self.webhooks.append(WebhookClient(Environment.get("SLACK_ENDPOINT_DEBUG")))
+
+    def suppress(self):
+        self.silent = True
 
     def add_warning(self, warning: str):
         if warning not in self.warnings:
@@ -42,14 +47,16 @@ class SlackManager:
         text += "> *Notes*: " + self.submission.get_game_plan() + "\n"
         return text
 
-    def set_current_student(
-        self, submission: FormSubmission, student: StudentRecord, assignment_manager: AssignmentManager
-    ):
+    def set_current_student(self, submission: FormSubmission, student: StudentRecord, assignments: AssignmentList):
         self.submission = submission
         self.student = student
-        self.assignment_manager = assignment_manager
+        self.assignments = assignments
 
     def send_message(self, message: str) -> None:
+        if self.silent:
+            print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
+            return
+
         for webhook in self.webhooks:
             response = webhook.send(text=message)
             self.check_error(response)
@@ -59,7 +66,7 @@ class SlackManager:
         slack_tags = Environment.safe_get("SLACK_TAG_LIST")
         prefix = ""
         if slack_tags:
-            uids = [row.strip() for row in slack_tags.split(",")]
+            uids = cast_list_str(slack_tags)
             prefix = " ".join([f"<@{uid}>" for uid in uids]) + " "
         return prefix
 
@@ -72,10 +79,10 @@ class SlackManager:
 
         message += "\n"
         rows = []
-        for assignment_id in self.assignment_manager.get_all_ids():
-            num_days = self.student.get_assignment(assignment_id)
+        for assignment in self.assignments:
+            num_days = self.student.get_request(assignment.get_id())
             if num_days:
-                rows.append([self.assignment_manager.id_to_name(assignment_id), num_days])
+                rows.append([assignment.get_name(), num_days])
         if len(rows) > 0:
             message += "```"
             message += tabulate(rows)
@@ -88,6 +95,10 @@ class SlackManager:
             for w in self.warnings:
                 message += w + "\n"
             message += "```"
+
+        if self.silent:
+            print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
+            return
 
         if autoapprove:
             for webhook in self.webhooks:

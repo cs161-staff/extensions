@@ -1,9 +1,10 @@
 import os
 from typing import Any, Dict, List, Optional, Tuple
-import gspread
 
-from src.errors import ConfigurationError, KnownError, SheetError
+import gspread
 from gspread.worksheet import Worksheet
+
+from src.errors import SheetError
 
 SHEET_STUDENT_RECORDS = "Roster"
 SHEET_ASSIGNMENTS = "Assignments"
@@ -38,6 +39,12 @@ class Sheet:
                 return (i, record)
         return None
 
+    def update_cells(self, cells: List[Any]):
+        gspread_cells: List[gspread.Cell] = []
+        for row, col, value in cells:
+            gspread_cells.append(gspread.Cell(row=row + 2, col=col + 1, value=value))
+        self.sheet.update_cells(gspread_cells, value_input_option="USER_ENTERED")
+
     def update_cell(self, row_index: int, col_index: int, value: Any) -> Dict[str, Any]:
         """
         Note: pass in data-relative row_index and col_index here. This method offsets row_index by two,
@@ -47,6 +54,9 @@ class Sheet:
         row = row_index + 2
         col = col_index + 1
         self.sheet.update_cell(row, col, value)
+
+    def append_row(self, values: List[Any], value_input_option: str):
+        self.sheet.append_row(values=values, value_input_option=value_input_option)
 
 
 class BaseSpreadsheet:
