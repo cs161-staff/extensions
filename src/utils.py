@@ -1,5 +1,4 @@
 import os
-import uuid
 from datetime import datetime
 from typing import Any, List, Optional
 
@@ -45,27 +44,34 @@ def cast_list_int(cell: str) -> List[int]:
     return items
 
 
-shard = str(uuid.uuid4())
+PREFIX = "cs161extensions_"
 
 
 class Environment:
     @staticmethod
+    def clear():
+        keys = os.environ.keys()
+        for key in keys:
+            if key.startswith(PREFIX):
+                del os.environ[key]
+
+    @staticmethod
     def contains(key: str) -> bool:
-        return os.getenv(shard + key) is not None and str(os.getenv(shard + key)).strip() != ""
+        return os.getenv(PREFIX + key) is not None and str(os.getenv(PREFIX + key)).strip() != ""
 
     @staticmethod
     def safe_get(key: str, default: str = None) -> Optional[str]:
-        if os.getenv(shard + key):
-            data = str(os.getenv(shard + key)).strip()
+        if os.getenv(PREFIX + key):
+            data = str(os.getenv(PREFIX + key)).strip()
             if data:
                 return data
         return default
 
     @staticmethod
     def get(key: str) -> Any:
-        if not os.getenv(shard + key):
+        if not os.getenv(PREFIX + key):
             raise ConfigurationError("Environment variable not set: " + key)
-        return os.getenv(shard + key)
+        return os.getenv(PREFIX + key)
 
     @staticmethod
     def get_auto_approve_threshold() -> int:
@@ -91,9 +97,12 @@ class Environment:
             value = record.get("value")
             if not key:
                 continue
-            os.environ[shard + key] = str(value)
+            os.environ[PREFIX + key] = str(value)
 
         # Load local environment variables now from .env, which override remote provided variables for debugging
-        if os.path.exists(".env"):
-            for key, value in dotenv_values(".env").items():
-                os.environ[shard + key] = value
+        if os.path.exists(".env-pytest"):
+            for key, value in dotenv_values(".env-pytest").items():
+                if key == "APP_MASTER_SECRET":
+                    os.environ[key] = value
+                else:
+                    os.environ[PREFIX + key] = value

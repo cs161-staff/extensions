@@ -3,6 +3,7 @@ from typing import List
 from src.assignments import AssignmentList
 from src.email import Email
 from src.errors import ConfigurationError, KnownError
+from src.gradescope import Gradescope
 from src.record import EMAIL_STATUS_IN_QUEUE, StudentRecord
 from src.sheets import SHEET_ASSIGNMENTS, SHEET_ENVIRONMENT_VARIABLES, SHEET_STUDENT_RECORDS, BaseSpreadsheet
 from src.slack import SlackManager
@@ -46,6 +47,18 @@ def handle_email_queue(request_json):
                     + "Error: "
                     + str(err)
                 )
+
+            if Gradescope.is_enabled():
+                try:
+                    client = Gradescope()
+                    student.apply_extensions(assignments=assignments, gradescope=client)
+                except Exception as err:
+                    raise KnownError(
+                        f"Attempted to extend Gradescope assignments for {student.get_email()}, but failed.\n"
+                        + "Please extend this student's assignments manually.\n"
+                        + "Error: "
+                        + str(err)
+                    )
 
     slack = SlackManager()
     if len(emails) == 0:

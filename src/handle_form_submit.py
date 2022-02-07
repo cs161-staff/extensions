@@ -1,5 +1,5 @@
-from policy import Policy
 from src.errors import ConfigurationError
+from src.policy import Policy
 from src.sheets import (
     SHEET_ASSIGNMENTS,
     SHEET_ENVIRONMENT_VARIABLES,
@@ -8,6 +8,7 @@ from src.sheets import (
     BaseSpreadsheet,
 )
 from src.slack import SlackManager
+from src.utils import Environment
 
 
 def handle_form_submit(request_json):
@@ -17,13 +18,15 @@ def handle_form_submit(request_json):
     # Get a pointer to the spreadsheet in the request.
     base = BaseSpreadsheet(spreadsheet_url=request_json["spreadsheet_url"])
 
+    # Validate/configure environment variables
+    Environment.configure_env_vars(sheet=base.get_sheet(SHEET_ENVIRONMENT_VARIABLES))
+
     # Get a pointer to Slack.
     slack = SlackManager()
 
     policy = Policy(
         sheet_assignments=base.get_sheet(SHEET_ASSIGNMENTS),
         sheet_form_questions=base.get_sheet(SHEET_FORM_QUESTIONS),
-        sheet_env_vars=base.get_sheet(SHEET_ENVIRONMENT_VARIABLES),
         form_payload=request_json["form_data"],
         slack=slack,
     )

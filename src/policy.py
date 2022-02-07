@@ -3,6 +3,7 @@ from typing import Any, Dict, Optional
 from src.assignments import AssignmentList
 from src.email import Email
 from src.errors import KnownError
+from src.gradescope import Gradescope
 from src.record import StudentRecord
 from src.sheets import Sheet
 from src.slack import SlackManager
@@ -15,12 +16,9 @@ class Policy:
         self,
         sheet_assignments: Sheet,
         sheet_form_questions: Sheet,
-        sheet_env_vars: Sheet,
         form_payload: Dict[str, Any],
         slack: SlackManager,
     ):
-        # Validate/configure environment variables
-        Environment.configure_env_vars(sheet=sheet_env_vars)
 
         # Validate/extract assignments into model
         self.assignments = AssignmentList(sheet=sheet_assignments)
@@ -87,6 +85,11 @@ class Policy:
                 self.send_email(target=self.partner)
 
         # TODO: Step 7: If enabled, extend deadlines on Gradescope.
+        if not silent:
+            if Gradescope.is_enabled():
+                self.extend_assignments(target=self.student)
+                if self.partner:
+                    self.extend_assignments(target=self.partner)
 
         return True
 
@@ -134,7 +137,7 @@ class Policy:
         if not self.submission.claims_dsp() and num_requests > Environment.get_auto_approve_assignment_threshold():
             needs_human = (
                 f"this student has requested more assignment extensions ({num_requests}) than the "
-                + "auto-approve threshold ({Environment.get_auto_approve_assignment_threshold()})"
+                + f"auto-approve threshold ({Environment.get_auto_approve_assignment_threshold()})"
             )
 
         # Walk through each extension request contained within this form submission.
@@ -148,7 +151,7 @@ class Policy:
             if existing_request and num_days <= existing_request:
                 self.slack.add_warning(
                     f"[{assignment.get_name()}] student requested an extension for {num_days} days, which "
-                    + "was <= an existing request of {existing_request} days, so we kept the existing request in-place."
+                    + f"was <= an existing request of {existing_request} days, so we kept the existing request in-place."
                 )
                 num_days = existing_request
 
@@ -159,7 +162,7 @@ class Policy:
                 else:
                     needs_human = (
                         f"a request of {num_days} days is greater than auto-approve threshold "
-                        + "of {Environment.get_auto_approve_threshold()} days"
+                        + f"of {Environment.get_auto_approve_threshold()} days"
                     )
 
             # Flag Case #2: The number of requested days is too large (DSP).
@@ -185,7 +188,7 @@ class Policy:
             self.student.flush()
             if self.partner:
                 self.partner.set_status_pending()
-                self.partner.set_log(f"{needs_human} [submitter: {self.student.get_email()}] " + needs_human)
+                self.partner.set_log(f"{needs_human} [submitter: {self.student.get_email()}]")
                 self.partner.flush()
 
         return needs_human
@@ -224,3 +227,16 @@ class Policy:
                 + "Error: "
                 + str(err)
             )
+
+    def extend_assignments(self, target: StudentRecord):
+        if Gradescope.is_enabled():
+            try:
+                client = Gradescope()
+                target.apply_extensions(assignments=self.assignments, gradescope=client)
+            except Exception as err:
+                raise KnownError(
+                    f"Attempted to extend Gradescope assignments for {target.get_email()}, but failed.\n"
+                    + "Please extend this student's assignments manually (and their partner's, if applicable).\n"
+                    + "Error: "
+                    + str(err)
+                )

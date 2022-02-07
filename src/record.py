@@ -134,11 +134,15 @@ class StudentRecord:
         for assignment in assignments:
             num_days = self.get_request(assignment_id=assignment.get_id())
             if num_days:
-                gradescope.apply_extension(
-                    assignment_urls=assignment.get_gradescope_assignment_urls(),
-                    email=self.get_email(),
-                    new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
-                )
+                if len(assignment.get_gradescope_assignment_urls()) > 0:
+                    print("Extending assignments: " + str(assignment.get_gradescope_assignment_urls()))
+                    gradescope.apply_extension(
+                        assignment_urls=assignment.get_gradescope_assignment_urls(),
+                        email=self.get_email(),
+                        new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
+                    )
+                else:
+                    print("Skipping assignment extensions for " + str(assignment.get_name()))
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:

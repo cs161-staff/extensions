@@ -13,6 +13,7 @@ from src.sheets import (
     BaseSpreadsheet,
 )
 from src.slack import SlackManager
+from src.utils import Environment
 
 from tests.MockSheet import MockSheet
 
@@ -64,11 +65,11 @@ class TestIntegration:
         }
 
     def get_policy(self, mock_request: Dict[str, Any], timestamp: str):
+        Environment.configure_env_vars(TestIntegration.sheet_env_vars)
         slack = SlackManager()
         policy = Policy(
             sheet_assignments=TestIntegration.sheet_assignments,
             sheet_form_questions=TestIntegration.sheet_form_questions,
-            sheet_env_vars=TestIntegration.sheet_env_vars,
             form_payload={"Timestamp": [timestamp]},
             slack=slack,
         )

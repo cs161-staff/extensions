@@ -2,6 +2,7 @@ import src.handle_email_queue as handle_email
 import src.handle_form_submit as handle_form
 from src.errors import KnownError
 from src.slack import SlackManager
+from src.utils import Environment
 
 
 def handle_email_queue(request):
@@ -17,6 +18,8 @@ def handle_email_queue(request):
         print("Internal Error Occurred: " + str(e) + f" (Request: {request_json})")
         SlackManager().send_error("Internal error: " + str(e) + f" (Request: {request_json})")
         raise
+    finally:
+        Environment.clear()
 
 
 def handle_form_submit(request):

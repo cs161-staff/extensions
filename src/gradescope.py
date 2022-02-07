@@ -5,8 +5,8 @@ import pytz
 from gradescope_api.client import GradescopeClient
 from gradescope_api.errors import GradescopeAPIError
 
-from src.errors import GradescopeError
-from src.utils import Environment
+from src.errors import GradescopeError, KnownError
+from src.utils import Environment, cast_bool
 
 
 class Gradescope:
@@ -24,10 +24,16 @@ class Gradescope:
         except GradescopeAPIError as err:
             raise GradescopeError(f"Failed to sign into Gradescope: {err}")
 
+    @staticmethod
+    def is_enabled():
+        return cast_bool(Environment.safe_get("EXTEND_GRADESCOPE_ASSIGNMENTS", "No"))
+
     def apply_extension(self, assignment_urls: List[str], email: str, new_due_date: datetime):
         for assignment_url in assignment_urls:
             course = self.client.get_course(course_url=assignment_url)
             student = course.get_student(email=email)
+            if not student:
+                raise KnownError(f"Student {email} not found on Gradescope course roster; check email!")
             assignment = course.get_assignment(assignment_url=assignment_url)
             new_due_date_utc = new_due_date.astimezone(pytz.utc)
             try:

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta
 from typing import List
 
@@ -101,7 +102,7 @@ class Email:
             header = ("Cc", ", ".join(self.cc_emails))
             extra_headers.append(header)
 
-        if not Environment.contains(ENV_APP_MASTER_SECRET):
+        if not os.environ.get(ENV_APP_MASTER_SECRET):
             raise KnownError(
                 "Internal error: environment master secret not set, so cannot send emails via the CS 162 mailserver!"
             )
