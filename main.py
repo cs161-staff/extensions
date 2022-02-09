@@ -1,3 +1,5 @@
+import json
+
 import src.handle_email_queue as handle_email
 import src.handle_form_submit as handle_form
 from src.errors import KnownError
@@ -7,6 +9,7 @@ from src.utils import Environment
 
 def handle_email_queue(request):
     request_json = request.get_json()
+    print("handle_email_queue called on payload: " + json.dumps(request_json))
     try:
         handle_email.handle_email_queue(request_json=request_json)
         return {"success": True}
@@ -24,6 +27,7 @@ def handle_email_queue(request):
 
 def handle_form_submit(request):
     request_json = request.get_json()
+    print("handle_email_queue called on payload: " + json.dumps(request_json))
     try:
         handle_form.handle_form_submit(request_json=request_json)
         return {"success": True}

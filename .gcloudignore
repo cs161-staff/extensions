@@ -18,6 +18,8 @@ README.assets
 GETTING_STARTED.assets
 *.md
 
+.env-pytest
+
 *.pyc
 core/__pycache__/*
 extensions/
