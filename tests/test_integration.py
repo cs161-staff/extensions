@@ -88,7 +88,7 @@ class TestIntegration:
                 "email": "Z1@berkeley.edu",
                 "knows_assignments": "No",
                 "has_partner": "",
-                "game_plan": "I need to meet with a TA to figure out my situation.",
+                "game_plan": "test_requested_meeting",
                 "ignore": "",
             },
             timestamp="2022-01-27T20:46:42.125Z",
@@ -97,7 +97,12 @@ class TestIntegration:
 
     def test_requested_meeting_existing_work(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="Z2@berkeley.edu", assignments="Homework 1", days="1"),
+            mock_request=self.get_request(
+                email="Z2@berkeley.edu",
+                assignments="Homework 1",
+                days="1",
+                reason="test_requested_meeting_existing_work",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert policy.apply(silent=True)
@@ -108,7 +113,7 @@ class TestIntegration:
                 "email": "Z2@berkeley.edu",
                 "knows_assignments": "No",
                 "has_partner": "",
-                "game_plan": "I need to meet with a TA to figure out my situation.",
+                "game_plan": "test_requested_meeting_existing_work",
                 "ignore": "",
             },
             timestamp="2022-01-27T20:46:42.125Z",
@@ -120,14 +125,24 @@ class TestIntegration:
     #########################################################################################################
     def test_auto_approve_single_student_single_assignment(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="A1@berkeley.edu", assignments="Homework 1", days="1"),
+            mock_request=self.get_request(
+                email="A1@berkeley.edu",
+                assignments="Homework 1",
+                days="1",
+                reason="test_auto_approve_single_student_single_assignment",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert policy.apply(silent=True)
 
     def test_auto_approve_single_student_multiple_assignments(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="A2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
+            mock_request=self.get_request(
+                email="A2@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="2",
+                reason="test_auto_approve_single_student_multiple_assignments",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert policy.apply(silent=True)
@@ -140,6 +155,7 @@ class TestIntegration:
                 days="3, 3, 3",
                 has_partner="Yes",
                 partner_email="A4@berkeley.edu",
+                reason="test_auto_approve_single_student_multiple_assignments_with_partner",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -147,7 +163,13 @@ class TestIntegration:
 
     def test_auto_approve_dsp_single_assignment(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="A5@berkeley.edu", assignments="Homework 1", days="6", is_dsp="Yes"),
+            mock_request=self.get_request(
+                email="A5@berkeley.edu",
+                assignments="Homework 1",
+                days="6",
+                is_dsp="Yes",
+                reason="test_auto_approve_dsp_single_assignment",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert policy.apply(silent=True)
@@ -155,7 +177,11 @@ class TestIntegration:
     def test_auto_approve_dsp_multiple_assignments(self):
         policy = self.get_policy(
             mock_request=self.get_request(
-                email="A6@berkeley.edu", assignments="Homework 1, Homework 2", days="3, 4", is_dsp="Yes"
+                email="A6@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="3, 4",
+                is_dsp="Yes",
+                reason="test_auto_approve_dsp_multiple_assignments",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -168,6 +194,7 @@ class TestIntegration:
                 assignments="Homework 1, Homework 2",
                 days="3, 4",
                 is_dsp="My DSP letter is pending.",
+                reason="test_auto_approve_dsp_other_status",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -178,14 +205,24 @@ class TestIntegration:
     #########################################################################################################
     def test_retroactive_single_student_single_assignment(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="B1@berkeley.edu", assignments="Homework 1", days="1"),
+            mock_request=self.get_request(
+                email="B1@berkeley.edu",
+                assignments="Homework 1",
+                days="1",
+                reason="test_retroactive_single_student_single_assignment",
+            ),
             timestamp="2023-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
 
     def test_retroactive_single_student_multiple_assignments(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="B2@berkeley.edu", assignments="Homework 1, Homework 2", days="2"),
+            mock_request=self.get_request(
+                email="B2@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="2",
+                reason="test_retroactive_single_student_multiple_assignments",
+            ),
             timestamp="2023-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
@@ -195,7 +232,9 @@ class TestIntegration:
     #########################################################################################################
     def test_flag_request_too_many_days(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="C1@berkeley.edu", assignments="Homework 1", days="10"),
+            mock_request=self.get_request(
+                email="C1@berkeley.edu", assignments="Homework 1", days="10", reason="test_flag_request_too_many_days"
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
@@ -208,6 +247,7 @@ class TestIntegration:
                 days="10",
                 has_partner="Yes",
                 partner_email="C1.5@berkeley.edu",
+                reason="test_flag_request_too_many_days_with_partner",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -215,14 +255,25 @@ class TestIntegration:
 
     def test_flag_request_too_many_days_dsp(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="C2@berkeley.edu", assignments="Homework 1", days="10", is_dsp="Yes"),
+            mock_request=self.get_request(
+                email="C2@berkeley.edu",
+                assignments="Homework 1",
+                days="10",
+                is_dsp="Yes",
+                reason="test_flag_request_too_many_days_dsp",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
 
     def test_flag_request_too_many_days_multiple_assignments(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="C3@berkeley.edu", assignments="Homework 1, Homework 2", days="10, 2"),
+            mock_request=self.get_request(
+                email="C3@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="10, 2",
+                reason="test_flag_request_too_many_days_multiple_assignments",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
@@ -233,6 +284,21 @@ class TestIntegration:
                 email="C4@berkeley.edu",
                 assignments="Homework 1, Homework 2, Homework 3, Homework 4, Homework 5, Homework 6",
                 days="10",
+                reason="test_flag_too_many_submissions_in_one_request",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert not policy.apply(silent=True)
+
+    def test_flag_request_too_many_days_with_multiple_partners(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="C5@berkeley.edu",
+                assignments="Project 1 Checkpoint",
+                days="10",
+                has_partner="Yes",
+                partner_email="C5.5@berkeley.edu, C5.6@berkeley.edu, C5.7@berkeley.edu",
+                reason="test_flag_request_too_many_days_with_multiple_partners",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -243,20 +309,30 @@ class TestIntegration:
     #########################################################################################################
     def test_flag_wip_for_student(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            mock_request=self.get_request(
+                email="D1@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="4,4",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
 
         policy = self.get_policy(
-            mock_request=self.get_request(email="D1@berkeley.edu", assignments="Homework 3", days="2"),
+            mock_request=self.get_request(
+                email="D1@berkeley.edu", assignments="Homework 3", days="2", reason="test_flag_wip_for_student"
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
 
     def test_flag_wip_for_partner(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="D2@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            mock_request=self.get_request(
+                email="D2@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="4,4",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
@@ -268,6 +344,7 @@ class TestIntegration:
                 days="2",
                 has_partner="Yes",
                 partner_email="D2@berkeley.edu",
+                reason="test_flag_wip_for_partner",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -275,7 +352,11 @@ class TestIntegration:
 
     def test_flag_wip_for_student_with_partner(self):
         policy = self.get_policy(
-            mock_request=self.get_request(email="D4@berkeley.edu", assignments="Homework 1, Homework 2", days="4,4"),
+            mock_request=self.get_request(
+                email="D4@berkeley.edu",
+                assignments="Homework 1, Homework 2",
+                days="4,4",
+            ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
         assert not policy.apply(silent=True)
@@ -287,6 +368,7 @@ class TestIntegration:
                 days="2",
                 has_partner="Yes",
                 partner_email="D5@berkeley.edu",
+                reason="test_flag_wip_for_student_with_partner",
             ),
             timestamp="2022-01-27T20:46:42.125Z",
         )
@@ -298,7 +380,12 @@ class TestIntegration:
     def test_assignment_missing(self):
         with pytest.raises(KnownError):
             policy = self.get_policy(
-                mock_request=self.get_request(email="D2@berkeley.edu", assignments="Does Not Exist", days="4,4"),
+                mock_request=self.get_request(
+                    email="D2@berkeley.edu",
+                    assignments="Does Not Exist",
+                    days="4,4",
+                    reason="test_assignment_missing",
+                ),
                 timestamp="2022-01-27T20:46:42.125Z",
             )
             policy.apply(silent=True)

@@ -96,8 +96,8 @@ class FormSubmission:
     def has_partner(self) -> bool:
         return self.responses["has_partner"] == "Yes"
 
-    def get_partner_email(self) -> str:
-        return str(self.responses["partner_email"]).lower()
+    def get_partner_emails(self) -> List[str]:
+        return [row.lower() for row in cast_list_str(str(self.responses["partner_email"]))]
 
     def get_game_plan(self) -> str:
         return self.responses["game_plan"]

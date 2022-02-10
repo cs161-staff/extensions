@@ -49,7 +49,7 @@ Students request an extension through a Google Form (see an example [here](https
 
 ![image-20220127093941023](README.assets/image-20220127093941023.png)
 
-**If a student's working with a partner**, then they're asked to enter their partner's email and SID. Their partner will be included in extensions for any assignments that they select which are marked as partner projects.
+**If a student's working with one or more partners**, then they're asked to enter their partners' emails and SID's (comma-separated). Their partner(s) will be included in extensions for any assignments that they select which are marked as partner projects.
 
 **If a student doesn't know what assignment they need an extension on,** they can request a meeting with a TA. We've seen this happen for students who're in extenuating circumstances, and just need to talk through their situation before deciding upon a specific request.
 
@@ -148,9 +148,9 @@ All other cases are auto-approved! [See here for the logic that handles these ca
 
 If you want tighter control over what's approved, set `AUTO_APPROVE_THRESHOLD` to `0` and `AUTO_APPROVE_THRESHOLD_DSP` to `0`. It doesn't matter what you set `AUTO_APPROVE_ASSIGNMENT_THRESHOLD` to.
 
-**<u>What if a student submits an extension request with a partner?</u>**
+**<u>What if a student submits an extension request with one or more partners?</u>**
 
-Any requested extensions for assignments that are "partner" assignments will apply to the designated partner as well as the student. Both student records will be updated on the **Roster**, and the logic for approval will apply to both partners (e.g. if Partner A submits the form and Partner B has a "work-in-progress" record, then the extension as a whole will be flagged for manual approval).
+Any requested extensions for assignments that are "partner" assignments will apply to the designated partner(s) as well as the student. Both student records will be updated on the **Roster**, and the logic for approval will apply to all partners (e.g. if Partner A submits the form and Partner B has a "work-in-progress" record, then the extension as a whole will be flagged for manual approval).
 
 **<u>What happens if this thing internally combusts in the middle of the semester?</u>**
 

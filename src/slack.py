@@ -39,7 +39,7 @@ class SlackManager:
         if self.submission.claims_dsp():
             text += "> *DSP Accomodations for Extensions*: " + self.submission.dsp_status() + "\n"
         if self.submission.has_partner():
-            text += "> *Partner Email*: " + self.submission.get_partner_email() + "\n"
+            text += "> *Partner Email(s)*: " + ", ".join(self.submission.get_partner_emails()) + "\n"
         return text
 
     def _get_submission_details_unknown_assignments(self):

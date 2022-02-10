@@ -65,6 +65,10 @@ class StudentRecord:
         if "last_run_output" in self.sheet.get_headers():
             self.queue_write_back(col_key="last_run_output", col_value=log)
 
+    def set_last_run_reason(self, reason: str):
+        if "last_run_reason" in self.sheet.get_headers():
+            self.queue_write_back(col_key="last_run_reason", col_value=reason)
+
     def set_status_requested_meeting(self):
         self._queue_approval_status(APPROVAL_STATUS_REQUESTED_MEETING)
         self._queue_email_status("")
