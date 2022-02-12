@@ -15,12 +15,12 @@ class TestEntry:
                         "Email Address": ["shomil+cs161test@berkeley.edu"],
                         "Are you a DSP student with an accommodation for assignment extensions?": ["No"],
                         "Do you know what assignments(s) you need extensions on?": ["Yes"],
-                        "Which assignment would you like an extension on?": ["Homework 3"],
+                        "Which assignment would you like an extension on?": ["Project 3 (Code/Writeup)"],
                         "How many days would you like an extension for?": [2],
                         "Why do you need this extension?": ["Test case: a simple, auto-approved extension."],
-                        "Are you working with a partner on this assignment?": ["No"],
-                        "What is your partner's email?": [""],
-                        "What is your partner's Student ID?": [""],
+                        # "Are you working with one (or more) partners on this assignment?": ["No"],
+                        # "What is your partner's email?": [""],
+                        # "What is your partner's Student ID?": [""],
                         "About how long do you think you will have issues? When are you free to chat with a TA to make a game plan for the class?": [
                             ""
                         ],

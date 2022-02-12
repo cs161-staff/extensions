@@ -2,7 +2,7 @@ from typing import List
 
 from src.assignments import AssignmentList
 from src.email import Email
-from src.errors import ConfigurationError, KnownError
+from src.errors import ConfigurationError
 from src.gradescope import Gradescope
 from src.record import EMAIL_STATUS_IN_QUEUE, StudentRecord
 from src.sheets import SHEET_ASSIGNMENTS, SHEET_ENVIRONMENT_VARIABLES, SHEET_STUDENT_RECORDS, BaseSpreadsheet
@@ -29,6 +29,8 @@ def handle_email_queue(request_json):
     # Fetch all students.
     emails: List[str] = []
 
+    slack = SlackManager()
+
     for i, table_record in enumerate(sheet_records.get_all_records()):
         student = StudentRecord(table_index=i, table_record=table_record, sheet=sheet_records)
         if student.email_status() == EMAIL_STATUS_IN_QUEUE:
@@ -40,27 +42,30 @@ def handle_email_queue(request_json):
                 student.flush()
                 emails.append(student.get_email())
             except Exception as err:
-                raise KnownError(
+                slack.add_warning(
                     f"Attempted to send an email to {student.get_email()}, but failed.\n"
                     + "Please follow up with this student manually and/or check email logs.\n"
                     + "If this is a spreadsheet error, correct the error, and re-run email queue processor.\n"
                     + "Error: "
                     + str(err)
                 )
+                continue
 
             if Gradescope.is_enabled():
                 try:
                     client = Gradescope()
-                    student.apply_extensions(assignments=assignments, gradescope=client)
+                    warnings = student.apply_extensions(assignments=assignments, gradescope=client)
+                    for warning in warnings:
+                        slack.add_warning(warning)
                 except Exception as err:
-                    raise KnownError(
+                    slack.add_warning(
                         f"Attempted to extend Gradescope assignments for {student.get_email()}, but failed.\n"
-                        + "Please extend this student's assignments manually.\n"
+                        + "Please extend this student's assignments manually, and then re-run 'Dispatch Emails'.\n"
                         + "Error: "
                         + str(err)
                     )
+                    continue
 
-    slack = SlackManager()
     if len(emails) == 0:
         slack.send_message("Sent zero emails from the queue...was it empty?")
     else:

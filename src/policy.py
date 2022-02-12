@@ -271,7 +271,9 @@ class Policy:
         if Gradescope.is_enabled():
             try:
                 client = Gradescope()
-                target.apply_extensions(assignments=self.assignments, gradescope=client)
+                warnings = target.apply_extensions(assignments=self.assignments, gradescope=client)
+                for warning in warnings:
+                    self.slack.add_warning(warning)
             except Exception as err:
                 raise KnownError(
                     f"Attempted to extend Gradescope assignments for {target.get_email()}, but failed.\n"

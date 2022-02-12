@@ -59,13 +59,19 @@ class Email:
             if num_days:
                 name = assignment.get_name()
 
-                original = assignment.get_due_date()
-                extended = original + timedelta(days=int(num_days))
+                if assignment.get_due_date():
+                    original = assignment.get_due_date()
+                    extended = original + timedelta(days=int(num_days))
 
-                body += f"{name} ({num_days} Day Extension)" + "\n"
-                body += f"Original Deadline: {fmt_date(original)}" + "\n"
-                body += f"Extended Deadline: {fmt_date(extended)}" + "\n"
-                body += "\n"
+                    body += f"{name} ({num_days} Day Extension)" + "\n"
+                    body += f"Original Deadline: {fmt_date(original)}" + "\n"
+                    body += f"Extended Deadline: {fmt_date(extended)}" + "\n"
+                    body += "\n"
+                else:
+                    body += f"{name} ({num_days} Day Extension)" + "\n"
+                    body += "Original Deadline: TBD" + "\n"
+                    body += "Extended Deadline: TBD" + "\n"
+                    body += "\n"
 
         comments = student.get_email_comments()
         if comments:
@@ -78,7 +84,7 @@ class Email:
         body += Environment.get(ENV_EMAIL_SIGNATURE)
         body += "\n\n"
         body += (
-            "Disclaimer: This is an auto-generated email. We (the human course staff) may follow up with you in"
+            "Disclaimer: This is an auto-generated email. We may follow up with you in"
             + " this thread, and feel free to reply to this thread if you'd like to follow up with us!"
         )
 

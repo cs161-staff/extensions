@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from dateutil import parser
 from pytz import timezone
@@ -16,7 +16,7 @@ class Assignment:
     An instance of an assignment, created from a user-provided list of assignments.
     """
 
-    def __init__(self, name: str, id: str, due_date: datetime, partner: bool, gradescope: List[str]) -> None:
+    def __init__(self, name: str, id: str, due_date: Optional[datetime], partner: bool, gradescope: List[str]) -> None:
         self.name = name
         self.id = id
         self.due_date = due_date
@@ -27,6 +27,11 @@ class Assignment:
         """
         Return true if this extension request was submitted after an assignment was due.
         """
+        # Encoding default behavior: if the due date is not set, then this assignment is NOT past due.
+        # Thus, a request may qualify for auto-approval even if the due date is not set!
+        if not self.due_date:
+            return False
+
         request_time: datetime = parser.parse(request_time)
         if request_time.tzinfo is None:
             request_time = PST.localize(request_time)
@@ -41,7 +46,7 @@ class Assignment:
     def get_id(self) -> str:
         return self.id
 
-    def get_due_date(self) -> datetime:
+    def get_due_date(self) -> Optional[datetime]:
         return self.due_date
 
     def is_partner_assignment(self):
@@ -65,7 +70,7 @@ class AssignmentList:
                     Assignment(
                         name=name,
                         id=row["id"],
-                        due_date=cast_date(row["due_date"]),
+                        due_date=cast_date(row.get("due_date", ""), optional=True),
                         partner=cast_bool(row["partner"]),
                         gradescope=cast_list_str(row.get("gradescope", "")),
                     )

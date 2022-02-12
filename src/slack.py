@@ -57,6 +57,14 @@ class SlackManager:
             print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
             return
 
+        if len(self.warnings) > 0:
+            message += "\n"
+            message += "*Warnings:*\n"
+            message += "```" + "\n"
+            for w in self.warnings:
+                message += w + "\n"
+            message += "```"
+
         for webhook in self.webhooks:
             response = webhook.send(text=message)
             self.check_error(response)

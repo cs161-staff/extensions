@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from dateutil.parser import parse
 from pytz import timezone
@@ -134,19 +134,31 @@ class StudentRecord:
                 self.table_record[col] = value
             self.sheet.update_cells(cells=cells)
 
-    def apply_extensions(self, assignments: AssignmentList, gradescope: Gradescope):
+    def apply_extensions(self, assignments: AssignmentList, gradescope: Gradescope) -> List[str]:
+        warnings = []
         for assignment in assignments:
             num_days = self.get_request(assignment_id=assignment.get_id())
             if num_days:
                 if len(assignment.get_gradescope_assignment_urls()) > 0:
                     print("Extending assignments: " + str(assignment.get_gradescope_assignment_urls()))
-                    gradescope.apply_extension(
-                        assignment_urls=assignment.get_gradescope_assignment_urls(),
-                        email=self.get_email(),
-                        new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
-                    )
+
+                    if assignment.get_due_date():
+                        gradescope.apply_extension(
+                            assignment_urls=assignment.get_gradescope_assignment_urls(),
+                            email=self.get_email(),
+                            new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
+                        )
+                    else:
+                        warnings.append(
+                            f"Could not extend assignment deadline for {assignment.get_name()} (deadline not set)."
+                        )
+
                 else:
+                    warnings.append(
+                        f"Could not extend assignment deadline for {assignment.get_name()} (assignment URL's not set)."
+                    )
                     print("Skipping assignment extensions for " + str(assignment.get_name()))
+        return warnings
 
     @staticmethod
     def from_email(email: str, sheet_records: Sheet) -> StudentRecord:

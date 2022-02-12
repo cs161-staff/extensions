@@ -19,8 +19,10 @@ def cast_bool(cell: str) -> bool:
     return cell == "Yes"
 
 
-def cast_date(cell: str, deadline: bool = True) -> datetime:
+def cast_date(cell: str, deadline: bool = True, optional: bool = False) -> Optional[datetime]:
     try:
+        if optional and (cell is None or str(cell).strip() == ""):
+            return None
         cell = str(cell).strip()
         suffix = " 11:59 PM" if deadline else ""
         return PST.localize(parser.parse(str(cell) + suffix))

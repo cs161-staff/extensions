@@ -32,6 +32,7 @@ class FormSubmission:
                 self.responses[key] = str(form_payload[question][0])
 
         self.responses["Timestamp"] = form_payload["Timestamp"][0]
+        print(self.responses)
 
     def get_timestamp(self) -> str:
         return self.responses["Timestamp"]
@@ -43,22 +44,30 @@ class FormSubmission:
         return self.responses["is_dsp"]
 
     def claims_dsp(self) -> bool:
-        # If their response is "Yes" or some other text, we auto-approve the request for DSP purposes
+        # If their response is "Yes" or some other text, we auto-approve the request for DSP purposes.
         return self.responses["is_dsp"] != "No"
 
     def knows_assignments(self) -> bool:
+        # Encoding default behavior: if form doesn't contain knows_assignments field, then we assume
+        # that the student definitely knows their assignments.
+        if "knows_assignments" not in self.responses:
+            return True
+
         return self.responses["knows_assignments"] == "Yes"
 
     def get_raw_requests(self) -> str:
+        assert self.knows_assignments()
         return self.responses["assignments"]
 
     def get_num_requests(self) -> int:
+        assert self.knows_assignments()
         return len(self.responses["assignments"].split(","))
 
     def get_requests(self) -> List[Tuple[Assignment, int]]:
         """
         Fetch a map of ID to # days requested.
         """
+        assert self.knows_assignments()
         try:
             names = cast_list_str(self.responses["assignments"])
             try:
@@ -91,13 +100,21 @@ class FormSubmission:
             raise FormInputError(f"An error occurred while processing this student's form submission: {e}")
 
     def get_reason(self) -> str:
+        assert self.knows_assignments()
         return self.responses["reason"]
 
     def has_partner(self) -> bool:
+        # Encoding default behavior: if the form doesn't contain a has_partner field, then we assume
+        # the student is working alone (e.g. the class has all solo assignments).
+        if "has_partner" not in self.responses:
+            return False
+
         return self.responses["has_partner"] == "Yes"
 
     def get_partner_emails(self) -> List[str]:
+        assert self.has_partner()
         return [row.lower() for row in cast_list_str(str(self.responses["partner_email"]))]
 
     def get_game_plan(self) -> str:
+        assert not self.knows_assignments()
         return self.responses["game_plan"]

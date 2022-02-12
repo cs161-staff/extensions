@@ -200,6 +200,32 @@ class TestIntegration:
         )
         assert policy.apply(silent=True)
 
+    def test_auto_approve_deadline_not_set(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="A8@berkeley.edu",
+                assignments="Project 3 (Code/Writeup)",
+                days="3",
+                reason="test_auto_approve_deadline_not_set",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert policy.apply(silent=True)
+
+    def test_auto_approve_form_does_not_contain_has_partner_field(self):
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="A9@berkeley.edu",
+                assignments="Homework 1",
+                days="1",
+                reason="test_auto_approve_form_does_not_contain_has_partner_field",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        # delete the has_partner field entirely
+        del policy.submission.responses["has_partner"]
+        assert policy.apply(silent=True)
+
     #########################################################################################################
     # [B] MANUAL APPROVALS: Retroactive extension requests.
     #########################################################################################################
