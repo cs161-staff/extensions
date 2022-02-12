@@ -150,14 +150,14 @@ class StudentRecord:
                         )
                     else:
                         warnings.append(
-                            f"Could not extend assignment deadline for {assignment.get_name()} (deadline not set)."
+                            f"[{assignment.get_name()}] could not extend assignment deadline for {self.get_email()} (deadline not set)."
                         )
 
                 else:
                     warnings.append(
-                        f"Could not extend assignment deadline for {assignment.get_name()} (assignment URL's not set)."
+                        f"[{assignment.get_name()}] could not extend assignment deadline for {self.get_email()} (assignment URL's not set)."
                     )
-                    print("Skipping assignment extensions for " + str(assignment.get_name()))
+
         return warnings
 
     @staticmethod

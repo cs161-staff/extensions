@@ -52,18 +52,23 @@ class SlackManager:
         self.student = student
         self.assignments = assignments
 
+    def get_warnings(self) -> str:
+        warnings = ""
+        warnings += "\n"
+        warnings += "*Warnings:*\n"
+        warnings += "```" + "\n"
+        for w in self.warnings:
+            warnings += w + "\n"
+        warnings += "```"
+        return warnings
+
     def send_message(self, message: str) -> None:
         if self.silent:
             print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)
             return
 
         if len(self.warnings) > 0:
-            message += "\n"
-            message += "*Warnings:*\n"
-            message += "```" + "\n"
-            for w in self.warnings:
-                message += w + "\n"
-            message += "```"
+            message += self.get_warnings()
 
         for webhook in self.webhooks:
             response = webhook.send(text=message)
@@ -97,12 +102,9 @@ class SlackManager:
             message += "```"
         message += "\n"
         message += "\n"
+
         if len(self.warnings) > 0:
-            message += "*Warnings:*\n"
-            message += "```" + "\n"
-            for w in self.warnings:
-                message += w + "\n"
-            message += "```"
+            message += self.get_warnings()
 
         if self.silent:
             print("\n" + ("#" * 30) + "\n" + message.strip() + "\n" + "#" * 30)

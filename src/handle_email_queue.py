@@ -52,19 +52,10 @@ def handle_email_queue(request_json):
                 continue
 
             if Gradescope.is_enabled():
-                try:
-                    client = Gradescope()
-                    warnings = student.apply_extensions(assignments=assignments, gradescope=client)
-                    for warning in warnings:
-                        slack.add_warning(warning)
-                except Exception as err:
-                    slack.add_warning(
-                        f"Attempted to extend Gradescope assignments for {student.get_email()}, but failed.\n"
-                        + "Please extend this student's assignments manually, and then re-run 'Dispatch Emails'.\n"
-                        + "Error: "
-                        + str(err)
-                    )
-                    continue
+                client = Gradescope()
+                warnings = student.apply_extensions(assignments=assignments, gradescope=client)
+                for warning in warnings:
+                    slack.add_warning(warning)
 
     if len(emails) == 0:
         slack.send_message("Sent zero emails from the queue...was it empty?")

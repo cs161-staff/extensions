@@ -85,7 +85,7 @@ class Policy:
         self.check_for_warnings()
 
         # Step 5: All checks have passed, so auto-approve the extension request!
-        self.approve()
+        message = self.approve()
 
         # Step 6: Send the email.
         if not silent:
@@ -96,11 +96,12 @@ class Policy:
 
         # TODO: Step 7: If enabled, extend deadlines on Gradescope.
         if not silent:
-            if Gradescope.is_enabled():
-                self.extend_assignments(target=self.student)
-                if self.partners:
-                    for partner in self.partners:
-                        self.extend_assignments(target=partner)
+            self.extend_assignments(target=self.student)
+            if self.partners:
+                for partner in self.partners:
+                    self.extend_assignments(target=partner)
+
+        self.slack.send_student_update(message=message, autoapprove=True)
 
         return True
 
@@ -253,14 +254,15 @@ class Policy:
                 partner.flush()
             message = "An extension request was automatically approved (for the submitter's partner(s), too!)"
 
-        self.slack.send_student_update(message=message, autoapprove=True)
+        return message
 
     def send_email(self, target: StudentRecord):
         try:
             email = Email.from_student_record(student=target, assignments=self.assignments)
             email.send()
         except Exception as err:
-            raise KnownError(
+            print(err)
+            self.slack.add_warning(
                 "Writes to spreadsheet succeed, but email to student failed.\n"
                 + "Please follow up with this student manually and/or check email logs.\n"
                 + "Error: "
@@ -269,15 +271,7 @@ class Policy:
 
     def extend_assignments(self, target: StudentRecord):
         if Gradescope.is_enabled():
-            try:
-                client = Gradescope()
-                warnings = target.apply_extensions(assignments=self.assignments, gradescope=client)
-                for warning in warnings:
-                    self.slack.add_warning(warning)
-            except Exception as err:
-                raise KnownError(
-                    f"Attempted to extend Gradescope assignments for {target.get_email()}, but failed.\n"
-                    + "Please extend this student's assignments manually (and their partner's, if applicable).\n"
-                    + "Error: "
-                    + str(err)
-                )
+            client = Gradescope()
+            warnings = target.apply_extensions(assignments=self.assignments, gradescope=client)
+            for warning in warnings:
+                self.slack.add_warning(warning)
