@@ -37,10 +37,11 @@ class Gradescope:
     ) -> List[str]:
         warnings = []
         for assignment_url in assignment_urls:
+            prefix = f"[{email}] [{assignment_url}] "
+
             try:
                 course = self.client.get_course(course_url=assignment_url)
                 student = course.get_student(email=email)
-                prefix = f"[{email}] [{assignment_url}] "
                 if not student:
                     warnings.append(prefix + "failed to extend assignment in Gradescope: student not found")
                     return warnings
