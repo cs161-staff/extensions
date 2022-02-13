@@ -16,10 +16,19 @@ class Assignment:
     An instance of an assignment, created from a user-provided list of assignments.
     """
 
-    def __init__(self, name: str, id: str, due_date: Optional[datetime], partner: bool, gradescope: List[str]) -> None:
+    def __init__(
+        self,
+        name: str,
+        id: str,
+        due_date: Optional[datetime],
+        hard_due_date: Optional[datetime],
+        partner: bool,
+        gradescope: List[str],
+    ) -> None:
         self.name = name
         self.id = id
         self.due_date = due_date
+        self.hard_due_date = hard_due_date
         self.partner = partner
         self.gradescope = gradescope
 
@@ -49,6 +58,9 @@ class Assignment:
     def get_due_date(self) -> Optional[datetime]:
         return self.due_date
 
+    def get_hard_due_date(self) -> Optional[datetime]:
+        return self.hard_due_date
+
     def is_partner_assignment(self):
         return self.partner
 
@@ -71,6 +83,7 @@ class AssignmentList:
                         name=name,
                         id=row["id"],
                         due_date=cast_date(row.get("due_date", ""), optional=True),
+                        hard_due_date=cast_date(row.get("hard_due_date", ""), optional=True),
                         partner=cast_bool(row["partner"]),
                         gradescope=cast_list_str(row.get("gradescope", "")),
                     )

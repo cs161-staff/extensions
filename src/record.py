@@ -147,6 +147,7 @@ class StudentRecord:
                             assignment_urls=assignment.get_gradescope_assignment_urls(),
                             email=self.get_email(),
                             new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
+                            new_hard_due_date=assignment.get_hard_due_date(),
                         )
                     else:
                         warnings.append(
