@@ -2,10 +2,13 @@
 
 Note: for the latest "state" of the template spreadsheet, see [here](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit#gid=288250820). This may be especially helpful when specifying environment variables.
 
+### 2022-02-13
+- **[feature]** Added support for an optional `hard_due_date` column on the Assignments tab for classes that want to specify a designated hard due date beyond which extensions for a particular assignment will not be granted. Approved extensions will be granted to the earlier of (original due date + # extension days, hard due date). If the hard due date is not set, when applying an extension to Gradescope, the hard due date will be updated to match the new assignment deadline.
+
 ### 2022-02-11
 - **[feature]** Added support for optional `knows_assignments` form field (classes that don't want to support student support meetings through this system can delete all student support meeting related questions)
 - **[feature]** Added support for optional `has_partner` form field (classes that don't have partner assignments at all can safely delete all form-related questions)
-- **[feature]** Added support for optional `due_date` column on the Assignments tab (for classes that don't know all of their due dates ahead of time)
+- **[feature]** Added support for optional `due_date` column on the Assignments tab (for classes that don't know all of their due dates ahead of time). If `due_date` is not specified, a warning will be displayed in Slack, but extensions may still be approved/auto-approved (students will recieve a TBD message in their email).
 
 ### 2022-02-10
 - **[feature]** Added support for >= 2 partners. To enable this, change your form to specify that students working with partners can include a comma-separated list of names and SID's if they say they're working with a partner.
