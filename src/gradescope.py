@@ -48,9 +48,10 @@ class Gradescope:
                 new_hard_due_date_utc = new_hard_due_date.astimezone(pytz.utc) if new_hard_due_date else None
                 if new_hard_due_date_utc and new_hard_due_date_utc < new_due_date_utc:
                     warnings.append(
-                        f"New due date was after the designated hard due date, so extended assignment to the designated hard due date instead (email: {email}, assignment: {assignment_url})"
+                        f"New due date was after the designated hard due date, so extended assignment to the designated hard due date instead. Please manually override if this wasn't the intended behavior. (email: {email}, assignment: {assignment_url})"
                     )
-                    new_due_date = new_hard_due_date
+                    new_due_date_utc = new_hard_due_date_utc
+                    new_hard_due_date_utc = None
                 assignment.create_extension(
                     user_id=student.get_user_id(), due_date=new_due_date_utc, hard_due_date=new_hard_due_date_utc
                 )
