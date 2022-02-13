@@ -40,25 +40,27 @@ class Gradescope:
             try:
                 course = self.client.get_course(course_url=assignment_url)
                 student = course.get_student(email=email)
+                prefix = f"[{email}] [{assignment_url}] "
                 if not student:
-                    warnings.append(f"Student {email} not found on Gradescope course roster; check email!")
+                    warnings.append(prefix + "failed to extend assignment in Gradescope: student not found")
                     return warnings
                 assignment = course.get_assignment(assignment_url=assignment_url)
                 new_due_date_utc = new_due_date.astimezone(pytz.utc)
                 new_hard_due_date_utc = new_hard_due_date.astimezone(pytz.utc) if new_hard_due_date else None
                 if new_hard_due_date_utc and new_hard_due_date_utc < new_due_date_utc:
                     warnings.append(
-                        f"New due date was after the designated hard due date, so extended assignment to the designated hard due date instead. Please manually override if this wasn't the intended behavior. (email: {email}, assignment: {assignment_url})"
+                        prefix
+                        + "new due date was after the designated hard due date, so extended assignment to the designated hard due date instead. Please manually override if this wasn't the intended behavior. (email: {email}, assignment: {assignment_url})"
                     )
                     new_due_date_utc = new_hard_due_date_utc
                     new_hard_due_date_utc = None
                 assignment.create_extension(
                     user_id=student.get_user_id(), due_date=new_due_date_utc, hard_due_date=new_hard_due_date_utc
                 )
-                print(f"Successfully extended deadline for {email} to {new_due_date} on assignment {assignment_url}")
+                print(prefix + f"successfully extended deadline to {new_due_date}")
             except Exception as err:
                 print("GradescopeAPIError: " + str(err))
                 warnings.append(
-                    f"Could not extend assignment deadline for {email} for {assignment_url} (internal Gradescope error: {err})"
+                    prefix + f"failed to extend assignment in Gradescope: internal Gradescope error occurred ({err})"
                 )
         return warnings

@@ -49,7 +49,6 @@ def handle_email_queue(request_json):
                     + "Error: "
                     + str(err)
                 )
-                continue
 
             if Gradescope.is_enabled():
                 client = Gradescope()
