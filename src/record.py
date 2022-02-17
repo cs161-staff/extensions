@@ -43,6 +43,9 @@ class StudentRecord:
     def get_email(self):
         return self.table_record["email"].lower()
 
+    def roster_contains_dsp_status(self):
+        return "is_dsp" in self.table_record
+
     def is_dsp(self):
         return self.table_record["is_dsp"] == "Yes"
 

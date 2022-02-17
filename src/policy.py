@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional
 
 from src.assignments import AssignmentList
 from src.email import Email
-from src.errors import KnownError
 from src.gradescope import Gradescope
 from src.record import StudentRecord
 from src.sheets import Sheet
@@ -233,7 +232,7 @@ class Policy:
         return needs_human
 
     def check_for_warnings(self):
-        if self.submission.claims_dsp() and not self.student.is_dsp():
+        if self.submission.claims_dsp() and (self.student.roster_contains_dsp_status() and not self.student.is_dsp()):
             self.slack.add_warning(
                 f"Student {self.submission.get_email()} responded '{self.submission.dsp_status()}' to "
                 + "DSP question in extension request, but is not marked for DSP approval on the roster. "
