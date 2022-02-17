@@ -10,38 +10,14 @@ class TestGradescope:
         warnings = Gradescope().apply_extension(
             assignment_urls=["https://www.gradescope.com/courses/56746/assignments/942482/review_grades"],
             email="shomil+cs161test@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
+            num_days=1,
         )
         assert len(warnings) == 0
-
-    def test_apply_extension_late_due_date_after_due_date(self):
-        # In this case, the new hard due date is BEAFFORE the provided late due date, so we should apply the extension
-        # normally.
-        warnings = Gradescope().apply_extension(
-            assignment_urls=["https://www.gradescope.com/courses/56746/assignments/942482/review_grades"],
-            email="shomil+cs161test@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
-            new_hard_due_date=datetime.now() + timedelta(5),
-        )
-        assert len(warnings) == 0
-
-    def test_apply_extension_late_due_date_before_due_date(self):
-        # In this case, the new due date is AFTER the provided late due date, so we should
-        # throw a warning, but apply the extension up until the provided hard due date only.
-        warnings = Gradescope().apply_extension(
-            assignment_urls=["https://www.gradescope.com/courses/56746/assignments/942482/review_grades"],
-            email="shomil+cs161test@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
-            new_hard_due_date=datetime.now() - timedelta(3),
-        )
-        assert len(warnings) == 1
 
     def test_apply_extension_invalid_url(self):
         # Try to apply an extension to an invalid URL
         warnings = Gradescope().apply_extension(
-            assignment_urls=["hello world"],
-            email="shomil+cs161test@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
+            assignment_urls=["hello world"], email="shomil+cs161test@berkeley.edu", num_days=3
         )
         assert len(warnings) > 0
 
@@ -50,7 +26,7 @@ class TestGradescope:
         warnings = Gradescope().apply_extension(
             assignment_urls=["https://www.gradescope.com/courses/225521/assignments/929761/submissions/77765968"],
             email="shomil+cs161test@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
+            num_days=3,
         )
         assert len(warnings) > 0
 
@@ -59,6 +35,6 @@ class TestGradescope:
         warnings = Gradescope().apply_extension(
             assignment_urls=["https://www.gradescope.com/courses/56746/assignments/942482/review_grades"],
             email="helloworld@berkeley.edu",
-            new_due_date=datetime.now() + timedelta(3),
+            num_days=3,
         )
         assert len(warnings) > 0

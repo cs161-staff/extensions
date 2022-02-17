@@ -156,8 +156,7 @@ class StudentRecord:
                     warnings = gradescope.apply_extension(
                         assignment_urls=assignment.get_gradescope_assignment_urls(),
                         email=self.get_email(),
-                        new_due_date=assignment.get_due_date() + timedelta(days=int(num_days)),
-                        new_hard_due_date=assignment.get_hard_due_date(),
+                        num_days=num_days,
                     )
                     warnings.extend(warnings)
         return warnings
