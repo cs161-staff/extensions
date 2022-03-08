@@ -14,9 +14,14 @@ PST = timezone("US/Pacific")
 
 def cast_bool(cell: str) -> bool:
     cell = str(cell).strip()
-    if not (cell == "Yes" or cell == "No"):
+
+    # Default empty cells to a "No" boolean.
+    if cell == "":
+        cell = "No"
+
+    if not (cell in ["Yes", "No", "TRUE", "FALSE"]):
         raise KnownError(f"Boolean cell value was not Yes or No; instead, was {cell}")
-    return cell == "Yes"
+    return cell == "Yes" or cell == "TRUE"
 
 
 def cast_date(cell: str, deadline: bool = True, optional: bool = False) -> Optional[datetime]:
@@ -108,3 +113,10 @@ class Environment:
                     os.environ[key] = value
                 else:
                     os.environ[PREFIX + key] = value
+
+
+def truncate(s, amount=300):
+    s = str(s)
+    if len(s) > amount:
+        s = s[:amount] + "...see GCP for entire log."
+    return s

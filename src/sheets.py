@@ -43,7 +43,8 @@ class Sheet:
         gspread_cells: List[gspread.Cell] = []
         for row, col, value in cells:
             gspread_cells.append(gspread.Cell(row=row + 2, col=col + 1, value=value))
-        self.sheet.update_cells(gspread_cells, value_input_option="USER_ENTERED")
+        if len(gspread_cells) > 0:
+            self.sheet.update_cells(gspread_cells, value_input_option="USER_ENTERED")
 
     def update_cell(self, row_index: int, col_index: int, value: Any) -> Dict[str, Any]:
         """

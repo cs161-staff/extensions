@@ -1,12 +1,9 @@
-from datetime import datetime
-from typing import List, Optional
+from typing import List
 
-import pytz
 from gradescope_api.client import GradescopeClient
-from gradescope_api.errors import GradescopeAPIError
 
-from src.errors import GradescopeError, KnownError
-from src.utils import Environment, cast_bool
+from src.errors import GradescopeError
+from src.utils import Environment, cast_bool, truncate
 
 
 class Gradescope:
@@ -31,7 +28,8 @@ class Gradescope:
     def apply_extension(self, assignment_urls: List[str], email: str, num_days: int) -> List[str]:
         warnings = []
         for assignment_url in assignment_urls:
-            prefix = f"[{email}] [{assignment_url}] "
+            prefix = f"[{email}] [{assignment_url}] [{num_days}] "
+            print("Extending: " + prefix)
             try:
                 course = self.client.get_course(course_url=assignment_url)
                 assignment = course.get_assignment(assignment_url=assignment_url)
@@ -39,6 +37,7 @@ class Gradescope:
             except Exception as err:
                 print("GradescopeAPIError: " + str(err))
                 warnings.append(
-                    prefix + f"failed to extend assignment in Gradescope: internal Gradescope error occurred ({err})"
+                    prefix
+                    + f"failed to extend assignment in Gradescope: internal Gradescope error occurred ({truncate(err)})"
                 )
         return warnings

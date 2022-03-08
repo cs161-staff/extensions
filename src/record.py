@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from dateutil.parser import parse
@@ -10,6 +10,7 @@ from src.assignments import AssignmentList
 from src.errors import StudentRecordError
 from src.gradescope import Gradescope
 from src.sheets import Sheet
+from src.utils import cast_bool
 
 APPROVAL_STATUS_REQUESTED_MEETING = "Requested Meeting"
 APPROVAL_STATUS_PENDING = "Pending"
@@ -88,6 +89,15 @@ class StudentRecord:
         self._queue_approval_status(APPROVAL_STATUS_AUTO_APPROVED)
         self._queue_email_status(EMAIL_STATUS_AUTO_SENT)
 
+    def should_flush_gradescope(self):
+        if "flush_gradescope" in self.sheet.get_headers():
+            return cast_bool(self.table_record["flush_gradescope"])
+        return False
+
+    def set_flush_gradescope_status_success(self):
+        if "flush_gradescope" in self.sheet.get_headers():
+            self.queue_write_back(col_key="flush_gradescope", col_value=False)
+
     def get_request(self, assignment_id: str) -> Optional[int]:
         try:
             result = str(self.table_record[assignment_id])
@@ -143,7 +153,7 @@ class StudentRecord:
             num_days = self.get_request(assignment_id=assignment.get_id())
             if num_days:
                 if len(assignment.get_gradescope_assignment_urls()) == 0:
-                    warnings.append(
+                    print(
                         f"[{assignment.get_name()}] could not extend assignment deadline for {self.get_email()} (assignment URL's not set)."
                     )
                     continue

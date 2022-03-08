@@ -21,6 +21,7 @@ class MockSheet:
         self.df = pd.DataFrame(rows, columns=headers)
         self.df = self.df.fillna("")
         self.sheet = sheet
+        self.modified = False
 
     @staticmethod
     def from_live(sheet: Worksheet) -> MockSheet:
@@ -50,8 +51,11 @@ class MockSheet:
         for row, col, value in cells:
             self.df.loc[row][self.df.columns[col]] = value
         self.df = self.df.fillna("")
+        self.modified = True
 
     def flush(self):
+        if not self.modified:
+            return
         cells: List[gspread.Cell] = []
         for i, row in self.df.iterrows():
             for j, col in enumerate(self.df.columns):
@@ -62,3 +66,4 @@ class MockSheet:
     def append_row(self, values: List[Any], value_input_option: str):
         self.df.loc[len(self.df)] = values
         self.df = self.df.fillna("")
+        self.modified = True

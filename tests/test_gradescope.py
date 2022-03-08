@@ -1,5 +1,3 @@
-from datetime import datetime, timedelta
-
 from src.gradescope import Gradescope
 
 
