@@ -89,6 +89,12 @@ class Environment:
         return int(Environment.get("AUTO_APPROVE_THRESHOLD_DSP"))
 
     @staticmethod
+    def get_max_total_requested_extensions_threshold() -> int:
+        # If this number is <= 0, then assume this flag is disabled.
+        # If not, then apply this threshold in policy logic for non-DSP students.
+        return int(Environment.safe_get("MAX_TOTAL_REQUESTED_EXTENSIONS_THRESHOLD", default=0))
+
+    @staticmethod
     def get_auto_approve_assignment_threshold() -> int:
         return int(Environment.get("AUTO_APPROVE_ASSIGNMENT_THRESHOLD"))
 

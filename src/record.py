@@ -98,6 +98,13 @@ class StudentRecord:
         if "flush_gradescope" in self.sheet.get_headers():
             self.queue_write_back(col_key="flush_gradescope", col_value=False)
 
+    def count_requests(self, assignments=AssignmentList):
+        count = 0
+        for assignment_id in assignments.get_all_ids():
+            if self.get_request(assignment_id=assignment_id) is not None:
+                count += 1
+        return count
+
     def get_request(self, assignment_id: str) -> Optional[int]:
         try:
             result = str(self.table_record[assignment_id])
