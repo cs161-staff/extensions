@@ -203,19 +203,23 @@ class Policy:
             elif self.submission.claims_dsp() and num_days > Environment.get_auto_approve_threshold_dsp():
                 needs_human = f"a DSP request of {num_days} days is greater than DSP auto-approve threshold"
 
-            # Flag Case #3: The student has requested an extension on too many assignments (non-DSP).
+            # Flag Case #3: This extension request is retroactive (the due date is in the past).
+            elif assignment.is_past_due(request_time=self.submission.get_timestamp()):
+                needs_human = "student requested a retroactive extension on an assignment"
+
+            # Flag Case #4: The student has requested an extension on too many assignments (non-DSP).
             elif (
                 not self.submission.claims_dsp()
+                and Environment.get_max_total_requested_extensions_threshold() != -1
                 and total_num_extensions > Environment.get_max_total_requested_extensions_threshold()
             ):
                 needs_human = (
                     f"a student requested extensions on more assignments ({total_num_extensions} total)"
                     + " than the designated threshold"
                 )
+                print(needs_human)
 
-            # Flag Case #4: This extension request is retroactive (the due date is in the past).
-            elif assignment.is_past_due(request_time=self.submission.get_timestamp()):
-                needs_human = "student requested a retroactive extension on an assignment"
+            print(Environment.get_max_total_requested_extensions_threshold(), total_num_extensions)
 
             # Regardless of whether or not this needs a human, we write the number of days requested back onto the
             # roster sheet. Note that this write isn't pushed until we call flush().
