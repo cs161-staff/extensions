@@ -316,6 +316,32 @@ class TestIntegration:
         )
         assert not policy.apply(silent=True)
 
+    def test_flag_too_many_total_submissions_non_dsp(self):
+        # Note: based on environment variables, the threshold for # of assignments allowed is 6.
+        for i in range(1, 7):
+            policy = self.get_policy(
+                mock_request=self.get_request(
+                    email="C4.5@berkeley.edu",
+                    assignments=f"Homework {i}",
+                    days="2",
+                    reason="test_flag_too_many_submissions",
+                ),
+                timestamp="2022-01-27T20:46:42.125Z",
+            )
+            assert policy.apply(silent=True)
+
+        # The 7th request should trigger manual approval.
+        policy = self.get_policy(
+            mock_request=self.get_request(
+                email="C4.5@berkeley.edu",
+                assignments="Homework 7",
+                days="2",
+                reason="test_flag_too_many_submissions",
+            ),
+            timestamp="2022-01-27T20:46:42.125Z",
+        )
+        assert not policy.apply(silent=True)
+
     def test_flag_request_too_many_days_with_multiple_partners(self):
         policy = self.get_policy(
             mock_request=self.get_request(

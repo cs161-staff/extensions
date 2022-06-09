@@ -89,6 +89,13 @@ class Environment:
         return int(Environment.get("AUTO_APPROVE_THRESHOLD_DSP"))
 
     @staticmethod
+    def get_max_total_requested_extensions_threshold() -> int:
+        # If this number is -1, then assume this flag is disabled.
+        # If this number is 0, then reject all extensions.
+        # If this number is > 0, then reject extensions if the total number of extensions requested exceeds this number.
+        return int(Environment.safe_get("MAX_TOTAL_REQUESTED_EXTENSIONS_THRESHOLD", default=-1))
+
+    @staticmethod
     def get_auto_approve_assignment_threshold() -> int:
         return int(Environment.get("AUTO_APPROVE_ASSIGNMENT_THRESHOLD"))
 

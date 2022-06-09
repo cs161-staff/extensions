@@ -172,6 +172,8 @@ class Policy:
                 + f"auto-approve threshold ({Environment.get_auto_approve_assignment_threshold()})"
             )
 
+        total_num_extensions = self.student.count_requests(assignments=self.assignments) + num_requests
+
         # Walk through each extension request contained within this form submission.
         for assignment, num_days in self.submission.get_requests():
 
@@ -204,6 +206,20 @@ class Policy:
             # Flag Case #3: This extension request is retroactive (the due date is in the past).
             elif assignment.is_past_due(request_time=self.submission.get_timestamp()):
                 needs_human = "student requested a retroactive extension on an assignment"
+
+            # Flag Case #4: The student has requested an extension on too many assignments (non-DSP).
+            elif (
+                not self.submission.claims_dsp()
+                and Environment.get_max_total_requested_extensions_threshold() != -1
+                and total_num_extensions > Environment.get_max_total_requested_extensions_threshold()
+            ):
+                needs_human = (
+                    f"a student requested extensions on more assignments ({total_num_extensions} total)"
+                    + " than the designated threshold"
+                )
+                print(needs_human)
+
+            print(Environment.get_max_total_requested_extensions_threshold(), total_num_extensions)
 
             # Regardless of whether or not this needs a human, we write the number of days requested back onto the
             # roster sheet. Note that this write isn't pushed until we call flush().
