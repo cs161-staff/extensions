@@ -41,7 +41,7 @@ _Estimated Time: 10 minutes_
    - Click on "Triggers" in the sidebar (the little clock icon).
 
    - Add a **onFormSubmit** trigger that looks like this:
-     ![img](GETTING_STARTEd.assets/0Ur-tyYJ95715JEYTO3McmVlv8UXtcuSj448PzjfeVY1SWfRJO7X6lSl6_S5bWEsb2pa8WHg75BhFNfvNx65NZG9IbZv_QxrN3l3aZBqY97EDJLBS8tcW1ktBP9fwqZ512G5Tsy3-3315320.png)
+     ![img](GETTING_STARTED.assets/0Ur-tyYJ95715JEYTO3McmVlv8UXtcuSj448PzjfeVY1SWfRJO7X6lSl6_S5bWEsb2pa8WHg75BhFNfvNx65NZG9IbZv_QxrN3l3aZBqY97EDJLBS8tcW1ktBP9fwqZ512G5Tsy3-3315320.png)
 
 **Configuring Roster**
 
