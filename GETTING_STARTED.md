@@ -1,6 +1,6 @@
 # Getting Started
 
-If you'd like us to walk you through setup, feel free to email shomil@berkeley.edu or join the `#161-extension-bot` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like!
+If you'd like us to walk you through setup, feel free to email fuzailshakir@berkeley.edu or join the `#161-extension-bot` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like!
 
 It takes ~15 minutes to onboard your class onto this tool, and that time pays off as soon as your first extension requests start rolling in :)
 
