@@ -46,7 +46,7 @@ def handle_flush_gradescope(request):
 
 def handle_form_submit(request):
     request_json = request.get_json()
-    print("handle_email_queue called on payload: " + json.dumps(request_json))
+    print("handle_form_submit called on payload: " + json.dumps(request_json))
     try:
         handle_form.handle_form_submit(request_json=request_json)
         return {"success": True}
@@ -58,3 +58,5 @@ def handle_form_submit(request):
         print("Internal Error Occurred: " + str(e) + f" (Request: {request_json})")
         SlackManager().send_error("Internal error: " + str(e) + f" (Request: {truncate(request_json)})")
         raise
+    finally:
+        Environment.clear()
