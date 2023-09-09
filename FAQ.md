@@ -38,13 +38,13 @@ This page will list out quick responses, common bugs and their fixes, as well as
 
 ### "Student \<name\> responded '' to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!" 
 
-1. the dsp question is not visible to students but exists in the form so that the backend doesn't error. the response to this question will default to ‘’. That causes the response “Student <email> responded ‘’ to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!”
-    1. You can get rid of this error by deleting the "is_dsp" column from the roster tab. *Don't remove it from Form Questions*
-1. the dsp question is visible to students, but there is no option for "No". the response to this question will default to ''. That causes the response “Student <email> responded ‘’ to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!”
-1. the dsp question is visible to students, they select yes, their row does not yet exist in the roster spreadsheet. That causes a response along the lines “Student responded ‘yes’ to DSP question but is not a DSP student”. You can prevent the response, by going into the roster tab in the backend and marking them down as Yes in the DSP? column. You can do this in 2 ways:
-    1. add all dsp students to the roster before the semester starts and mark them as yes in the dsp column
-    1. whenever a student responds themselves as yes to the dsp question, check in AIM, and then update the dsp column to reflect their response
-1. the dsp question is visible to students and their response is “No”. this will not appear in the response from extension bot
+>1. the dsp question is not visible to students but exists in the form so that the backend doesn't error. the response to this question will default to ‘’. That causes the response “Student <email> responded ‘’ to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!”
+>    1. You can get rid of this error by deleting the "is_dsp" column from the roster tab. *Don't remove it from Form Questions*
+>1. the dsp question is visible to students, but there is no option for "No". the response to this question will default to ''. That causes the response “Student <email> responded ‘’ to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!”
+>1. the dsp question is visible to students, they select yes, their row does not yet exist in the roster spreadsheet. That causes a response along the lines “Student responded ‘yes’ to DSP question but is not a DSP student”. You can prevent the response, by going into the roster tab in the backend and marking them down as Yes in the DSP? column. You can do this in 2 ways:
+>    1. add all dsp students to the roster before the semester starts and mark them as yes in the dsp column
+>    1. whenever a student responds themselves as yes to the dsp question, check in AIM, and then update the dsp column to reflect their response
+>1. the dsp question is visible to students and their response is “No”. this will not appear in the response from extension bot
 
 <div id="cs162"></div>
 
