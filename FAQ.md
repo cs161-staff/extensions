@@ -24,7 +24,7 @@ This page will list out quick responses, common bugs and their fixes, as well as
 ### I want to modify the email sent to students!
 >You can use the built in method of the email column comments! Check out [an example here.](https://docs.google.com/spreadsheets/d/17-NKHpKrdW-1t1SoxMXHBvfF-Dery6lfefhPUW62WQM/edit?usp=sharing)
 
->Feel free to [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) this repo to create your own email template1
+>Feel free to [fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) this repo to create your own email template!
 
 ### The Form Responses tab is filling, but the Roster tab is not
 >One really common cause of this is forgetting to share the google sheet with the google api: cs-161-extensions@appspot.gserviceaccount.com (Part 2, step 3 of Getting Started)
