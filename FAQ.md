@@ -15,6 +15,7 @@ This page will list out quick responses, common bugs and their fixes, as well as
 ## Error messages
 * ["Student \<name\> responded '' to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!"](#snr)
 * ["Error: ('An error occurred while sending an email:', Exception(... Insufficient system storage', 'cs162ta@cs162.eecs.berkeley.edu'))"](#cs162)
+* ["\[https://www.gradescope.com/courses/<...> \] \[2\] failed to extend assignment in Gradescope: internal Gradescope error occurred (An error occurred in a request to Gradescope servers. Details: Status Code: 401 Error: could not load assignment <...>"](#gradescopeerr)
 
 ### Do I need to ask if students are enrolled in DSP?
 >So your course's extension policy is not different for students enrolled in DSP, no worries! Unfortunately, at this point in time, the script relies on there being a DSP question asked in the form. That being said, the example form as it currenly is prevents students from seeing the question, since 161 no longer uses DSP data to decide how to grant exensions. So you *must* keep this question in the google form, but students don't have to respond to it. See []() for more details. 
@@ -50,3 +51,12 @@ This page will list out quick responses, common bugs and their fixes, as well as
 
 ### "Error: ('An error occurred while sending an email:', Exception(... Insufficient system storage', 'cs162ta@cs162.eecs.berkeley.edu'))"
 >This is an error with the mailing server we use to send emails, hosted by CS 162 at UC Berkeley. Please contact them! You can either ping in #161-extensions in EECS Crossroads or, as of Fa23, contact Wilson Nguyen.
+
+<div id="gradescopeerr"></div>
+
+### "[https://www.gradescope.com/courses/<...> \] \[2\] failed to extend assignment in Gradescope: internal Gradescope error occurred (An error occurred in a request to Gradescope servers. Details: Status Code: 401 Error: could not load assignment <...>)"
+>This means there is some error within Gradescope itself. It could be caused by your Gradescope environment variables being incorrect or not leading to an account with permissions to edit assignments
+
+>Ex: Your spa has been aliased to create a gradescope account. The password is incorrect on Environment Variables.
+
+>Ex: The environment variables are correct, but your spa gradescope account is a student in the gradescope (possible if someone resets all accounts on the gradescope course)
