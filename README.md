@@ -4,7 +4,7 @@ The CS 161 Extensions Pipeline is a lightweight framework designed for tracking,
 
 At a high level, this pipeline consists of:
 
-- A **[Google Form](https://forms.gle/m25EswwXMpq6vqrp7)** that students submit extension requests to.
+- A **[Google Form](https://docs.google.com/forms/d/e/1FAIpQLSfrlZXWRdllpkllha9Abfib57qJcKrRfeHHW3kSmA2b3FZ_QA/viewform?usp=sf_link)** that students submit extension requests to.
 - A **[Google Sheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit#gid=790260459)** that collects student extension requests and tracks all extension requests in a master roster.
 - A **Google Cloud Function** that contains core business logic that:
   - Receives form data through a simple **Google Apps Script** trigger.
@@ -22,7 +22,7 @@ Traditionally, courses deal with two types of extensions –
 1. **DSP Extensions**, for students with accommodations for assignment extensions
 2. **Non-DSP Extensions**, for students facing extenuating or otherwise unforeseen circumstances
 
-Courses traditionally collect extension requests through Google Forms (e.g. ones provided by course managers, like [this one](https://docs.google.com/forms/d/e/1FAIpQLSek1NWhh6ERQsMJqbkFhv9JtNUPBQsJ3YSoo9uqsFGJ2Lb2iA/viewform)) or via email. In order to approve these extensions, however, courses (or course managers) need to:
+Courses traditionally collect extension requests through Google Forms (e.g. ones provided by course managers, like [this one](https://docs.google.com/forms/d/e/1FAIpQLSfrlZXWRdllpkllha9Abfib57qJcKrRfeHHW3kSmA2b3FZ_QA/viewform?usp=sf_link)) or via email. In order to approve these extensions, however, courses (or course managers) need to:
 
 - Read the student's request and categorize it into a DSP or Non-DSP extension.
 - Look up whether the student has previously requested assignment extensions.
@@ -43,7 +43,7 @@ The CS 161 Extension Pipeline addresses all of these challenges, significantly *
 
 # Our Pipeline: Student Workflow
 
-Students request an extension through a Google Form (see an example [here](https://docs.google.com/forms/d/e/1FAIpQLScearqptcOVkcmneQ97zJ07i-r_dtokwhb2rAtTv_WK6a2nJw/viewform)).
+Students request an extension through a Google Form (see an example [here](https://docs.google.com/forms/d/e/1FAIpQLSfrlZXWRdllpkllha9Abfib57qJcKrRfeHHW3kSmA2b3FZ_QA/viewform?usp=sf_link)).
 
 **If a student knows which assignments they want to request an extension on,** then they're prompted to select from a list of assignments, and provide a number of days for each extension. They can either enter a single number (which will apply to all assignments that they select), or enter comma-separated numbers (to allow them to request a different number of days for different assignments).
 
