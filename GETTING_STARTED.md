@@ -26,7 +26,7 @@ _Estimated Time: 10 minutes_
 1. Make a copy of [this spreadsheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit?usp=sharing). Make sure to rename it to "CS \_\_\_ SP22 Extensions Backend"
 2. Delete the “Form Responses” sheet within the spreadsheet.
 3. Share the spreadsheet with [cs-161-extensions@appspot.gserviceaccount.com](mailto:cs-161-extensions@appspot.gserviceaccount.com). This allows our hosted cloud function to read/write to your sheet. (If you're self-hosting, this should be your service account email.)
-4. Make a copy of [this form](https://docs.google.com/forms/d/1_9XobNT4R3z_bhlrVEUqMP92Bxa9W5FsedNngZuGwXc/edit?usp=sharing). Make sure to rename it. Close the form template, so you don't accidentally edit it.
+4. Make a copy of [this form](https://docs.google.com/forms/d/1uc9NUwxLnfTc1Zlv0Dec1A1Jsu5UYR7-0K2kfTR0Zqs/edit). Make sure to rename it. Close the form template, so you don't accidentally edit it.
 5. On the form, in the "Responses" tab, configure the form responses to be written to the Extensions Backend spreadsheet.
    - This should create a new tab within the Extensions Backend sheet.
    - Rename the tab to “Form Responses”.
