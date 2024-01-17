@@ -12,6 +12,7 @@ This page will list out quick responses, common bugs and their fixes, as well as
 ## After walking through [GETTING_STARTED.md](https://github.com/cs161-staff/extensions/blob/master/GETTING_STARTED.md)
 * [The Form Responses tab is filling, but the Roster tab is not](#the-form-responses-tab-is-filling-but-the-roster-tab-is-not)
 * [I need to change the name of the slack channel](#i-need-to-change-the-name-of-the-slack-channel)
+* [I want to add custom comments without copy-pasting](#I-want-to-add-custom-comments-without-copy-pasting)
 ## Error messages
 * ["Student \<name\> responded '' to DSP question in extension request, but is not marked for DSP approval on the roster. Please investigate!"](#snr)
 * ["Error: ('An error occurred while sending an email:', Exception(... Insufficient system storage', 'cs162ta@cs162.eecs.berkeley.edu'))"](#cs162)
@@ -34,6 +35,15 @@ This page will list out quick responses, common bugs and their fixes, as well as
 
 ### I need to change the name of the slack channel
 >No problem! Changing the name of the slack channel where the webhook points will not affect it. You should be able to do this with no consequences.
+
+### I want to add custom comments without copy-pasting
+>You can take advantage of google sheets to do this! On a separate tab, type out any comments you want to be able to toggle off and on for any given email. 
+![image-20240117-1](FAQ.assets/image-20240117-1.png)
+
+>Back in the roster tab, create two new columns. In one of the columns, column 1, insert a checkbox. In the other column, column 2, you can use the formula `IF(\<cell from column 1\>, \<cell of comment\>, "")`. If you want multiple comments you can use concatenate. 
+![image-20240117-1](FAQ.assets/image-20240117-2.png)
+
+>To include the comment, toggle on the check box. If the checkbox is unchecked, the formula above will include an empty string instead of the comment.
 
 <div id="snr"></div>
 
