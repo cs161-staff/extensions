@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import os
+import smtplib
+import ssl
 from datetime import datetime, timedelta
 from typing import List
 
@@ -99,7 +101,7 @@ class Email:
             body=body,
         )
 
-    def send(self) -> None:
+    def OLDsend(self) -> None:
         # TODO: When 162 adds HTML support, bring back HTML emails.
         # html_body = Markdown().convert(self.body)
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
@@ -125,3 +127,22 @@ class Email:
 
         except Exception as e:
             raise EmailError("An error occurred while sending an email:", e)
+
+
+        def send(self) -> None:
+            port = 587  # For starttls
+            smtp_server = "email-smtp.us-west-2.amazonaws.com"
+            sender_email = "seamless-learning@berkeley.edu"
+            receiver_email = "ooto@simulator.amazonses.com"
+            password = "BHhdBFBMXzxkzc/mVOKxgnlUtPJPWuShq3UoHhaOoicg"
+            message = self.body
+
+            context = ssl.create_default_context()
+            with smtplib.SMTP(smtp_server, port) as server:
+                server.ehlo()  # Can be omitted
+                server.starttls(context=context)
+                server.ehlo()  # Can be omitted
+                server.login("AKIA6JV7O2DSO5LAKD6I", password)
+                server.sendmail(sender_email, receiver_email, message)
+
+
