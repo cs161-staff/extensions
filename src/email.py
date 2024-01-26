@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import os
-import smtplib
-import ssl
 from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formataddr
+from smtplib import SMTP_SSL, SMTPException
 from typing import List
 
 from sicp.common.rpc.mail import send_email
@@ -129,20 +131,44 @@ class Email:
             raise EmailError("An error occurred while sending an email:", e)
 
 
-        def send(self) -> None:
-            port = 587  # For starttls
-            smtp_server = "email-smtp.us-west-2.amazonaws.com"
-            sender_email = "seamless-learning@berkeley.edu"
-            receiver_email = "ooto@simulator.amazonses.com"
-            password = "BHhdBFBMXzxkzc/mVOKxgnlUtPJPWuShq3UoHhaOoicg"
-            message = self.body
+    def send(self) -> None:
+        PORT = 465  # For starttls
+        HOST = "bcop.berkeley.edu"
+        username = "svc-bcop-seamless-learning"
+        sender_email = "seamless-learning@berkeley.edu"
+        SENDERNAME = Environment.get(ENV_EMAIL_FROM)
+        receiver_email = self.to_email
+        cc_emails = self.cc_emails
+        reply_to_email = self.reply_to_email
+        password = "RbLgAvAcba3Ba3chbsW5VQ4Z"
+        SUBJECT = self.subject
+        # message = """\
+        # Subject: Hi there
 
-            context = ssl.create_default_context()
-            with smtplib.SMTP(smtp_server, port) as server:
-                server.ehlo()  # Can be omitted
-                server.starttls(context=context)
-                server.ehlo()  # Can be omitted
-                server.login("AKIA6JV7O2DSO5LAKD6I", password)
-                server.sendmail(sender_email, receiver_email, message)
+        # This message is sent from Python."""
 
+        BODY_TEXT = ("BCOP TEST TEST")
 
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = SUBJECT
+        msg['From'] = formataddr((SENDERNAME, sender_email))
+        msg['To'] = receiver_email
+        msg.add_header('reply-to', reply_to_email)
+        if len(cc_emails) > 0:
+            msg['CC'] = ",".join(cc_emails)
+        # Comment or delete the next line if you are not using a configuration set
+        # msg.add_header('X-SES-CONFIGURATION-SET',CONFIGURATION_SET)
+
+        # Record the MIME types of both parts - text/plain and text/html.
+        part1 = MIMEText(self.body, 'plain')
+
+        # Attach parts into message container.
+        # According to RFC 2046, the last part of a multipart message, in this case
+        # the HTML message, is best and preferred.
+        msg.attach(part1)
+
+        with SMTP_SSL(HOST, PORT) as server:
+            server.login(username, password)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.close()
+            print("Email sent!")
