@@ -133,14 +133,14 @@ class Email:
 
     def send(self) -> None:
         PORT = 465  # For starttls
-        HOST = "bcop.berkeley.edu"
-        username = "svc-bcop-seamless-learning"
-        sender_email = "seamless-learning@berkeley.edu"
+        HOST = "REDACTED"
+        username = "REDACTED"
+        sender_email = "REDACTED"
         SENDERNAME = Environment.get(ENV_EMAIL_FROM)
         receiver_email = self.to_email
         cc_emails = self.cc_emails
         reply_to_email = self.reply_to_email
-        password = "RbLgAvAcba3Ba3chbsW5VQ4Z"
+        password = "REDACTED"
         SUBJECT = self.subject
         # message = """\
         # Subject: Hi there
@@ -169,6 +169,6 @@ class Email:
 
         with SMTP_SSL(HOST, PORT) as server:
             server.login(username, password)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
+            server.sendmail(sender_email, [receiver_email]+cc_emails, msg.as_string())
             server.close()
             print("Email sent!")
