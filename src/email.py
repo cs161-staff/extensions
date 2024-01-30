@@ -2,6 +2,10 @@ from __future__ import annotations
 
 import os
 from datetime import datetime, timedelta
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formataddr
+from smtplib import SMTP_SSL, SMTPException
 from typing import List
 
 from sicp.common.rpc.mail import send_email
@@ -99,7 +103,7 @@ class Email:
             body=body,
         )
 
-    def send(self) -> None:
+    def OLDsend(self) -> None:
         # TODO: When 162 adds HTML support, bring back HTML emails.
         # html_body = Markdown().convert(self.body)
         # extra_headers = [("Content-Type", "text/html; charset=UTF-8")]
@@ -125,3 +129,46 @@ class Email:
 
         except Exception as e:
             raise EmailError("An error occurred while sending an email:", e)
+
+
+    def send(self) -> None:
+        PORT = 465  # For starttls
+        HOST = "REDACTED"
+        username = "REDACTED"
+        sender_email = "REDACTED"
+        SENDERNAME = Environment.get(ENV_EMAIL_FROM)
+        receiver_email = self.to_email
+        cc_emails = self.cc_emails
+        reply_to_email = self.reply_to_email
+        password = "REDACTED"
+        SUBJECT = self.subject
+        # message = """\
+        # Subject: Hi there
+
+        # This message is sent from Python."""
+
+        BODY_TEXT = ("BCOP TEST TEST")
+
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = SUBJECT
+        msg['From'] = formataddr((SENDERNAME, sender_email))
+        msg['To'] = receiver_email
+        msg.add_header('reply-to', reply_to_email)
+        if len(cc_emails) > 0:
+            msg['CC'] = ",".join(cc_emails)
+        # Comment or delete the next line if you are not using a configuration set
+        # msg.add_header('X-SES-CONFIGURATION-SET',CONFIGURATION_SET)
+
+        # Record the MIME types of both parts - text/plain and text/html.
+        part1 = MIMEText(self.body, 'plain')
+
+        # Attach parts into message container.
+        # According to RFC 2046, the last part of a multipart message, in this case
+        # the HTML message, is best and preferred.
+        msg.attach(part1)
+
+        with SMTP_SSL(HOST, PORT) as server:
+            server.login(username, password)
+            server.sendmail(sender_email, [receiver_email]+cc_emails, msg.as_string())
+            server.close()
+            print("Email sent!")
