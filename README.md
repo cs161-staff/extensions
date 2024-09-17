@@ -1,3 +1,16 @@
+# Accessing from SIGCSE
+### Automated Support for Flexible Extensions
+*Poster Link*
+Jordan Schwartz, Madison Bohannan, Jacob Yim, Yuerou Tang, Dana Benedicto, Charisse Liu, Armando Fox, Lisa Yan, and Narges Norouzi. 2024.
+Automated Support for Flexible Extensions. In Proceedings of the 55th ACM Technical Symposium on Computer Science Education V. 2 (SIGCSE 2024), March 20–23, 2024, Portland, OR, USA. ACM, New York, NY, USA, 2 pages.
+https://doi.org/10.1145/3626253.3635628
+
+### Supporting Mastery Learning with Flexible Extensions
+*Poster Link*
+Yuerou Tang, Jacob Yim, Jordan Schwartz, Madison Bohannan, Dana Benedicto, Charisse Liu, Armando Fox, Lisa Yan, and Narges Norouzi. 2024.
+Supporting Mastery Learning with Flexible Extensions. In Proceedings of the 55th ACM Technical Symposium on Computer Science Education V. 2 (SIGCSE 2024), March 20–23, 2024, Portland, OR, USA. ACM, New York, NY, USA,
+2 pages. https://doi.org/10.1145/3626253.3635615
+
 # The CS 161 Extension Pipeline
 
 The CS 161 Extensions Pipeline is a lightweight framework designed for tracking, approving, and managing extension requests in medium and large classes (e.g. N > 50). It's optimized for courses in the EECS department at UC Berkeley, but is extensible to other departments and universities.
