@@ -3,9 +3,11 @@
 > [!IMPORTANT]
 > June 2025 and forward
 >
-> **We have moved all development of flextensions over to [@berkeley-cdss/extensions]().**
+> **We have moved all development of flextensions over to [@berkeley-cdss/extensions](https://github.com/berkeley-cdss/extensions).**
 
-If you have been using the Google sheets linked below, please make new copies from the sheets referenced in the @berkeley-cdss repository. They work the same way, but have new URLs for the Google Cloud Functions. 
+If you were using the Google sheets previously linked in this README, please make new copies from the sheets referenced in the @berkeley-cdss README. They work the same way, but have new URLs for the Google Cloud Functions. 
+
+If you have any questions, reach out to `#software-extensions` in EECS Crossroads, or write to seamless-learning@berkeley.edu
 
 ---
 
