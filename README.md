@@ -1,11 +1,43 @@
-# The CS 161 Extension Pipeline
+# **This extensions repo is now deprecated.**
+
+> [!IMPORTANT]
+> June 2025 and forward
+>
+> **We have moved all development of flextensions over to [@berkeley-cdss/extensions]().**
+
+If you have been using the Google sheets linked below, please make new copies from the sheets referenced in the @berkeley-cdss repository. They work the same way, but have new URLs for the Google Cloud Functions. 
+
+---
+
+## SIGCSE 2024 References
+
+### Automated Support for Flexible Extensions
+*Poster Link*
+Jordan Schwartz, Madison Bohannan, Jacob Yim, Yuerou Tang, Dana Benedicto, Charisse Liu, Armando Fox, Lisa Yan, and Narges Norouzi. 2024.
+Automated Support for Flexible Extensions. In Proceedings of the 55th ACM Technical Symposium on Computer Science Education V. 2 (SIGCSE 2024), March 20–23, 2024, Portland, OR, USA. ACM, New York, NY, USA, 2 pages.
+https://doi.org/10.1145/3626253.3635628
+
+### Supporting Mastery Learning with Flexible Extensions
+*Poster Link*
+Yuerou Tang, Jacob Yim, Jordan Schwartz, Madison Bohannan, Dana Benedicto, Charisse Liu, Armando Fox, Lisa Yan, and Narges Norouzi. 2024.
+Supporting Mastery Learning with Flexible Extensions. In Proceedings of the 55th ACM Technical Symposium on Computer Science Education V. 2 (SIGCSE 2024), March 20–23, 2024, Portland, OR, USA. ACM, New York, NY, USA,
+2 pages. https://doi.org/10.1145/3626253.3635615
+
+---
+
+## The CS 161 Extension Pipeline
 
 The CS 161 Extensions Pipeline is a lightweight framework designed for tracking, approving, and managing extension requests in medium and large classes (e.g. N > 50). It's optimized for courses in the EECS department at UC Berkeley, but is extensible to other departments and universities.
 
 At a high level, this pipeline consists of:
 
-- A **[Google Form](https://docs.google.com/forms/d/e/1FAIpQLSfrlZXWRdllpkllha9Abfib57qJcKrRfeHHW3kSmA2b3FZ_QA/viewform?usp=sf_link)** that students submit extension requests to.
-- A **[Google Sheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit#gid=790260459)** that collects student extension requests and tracks all extension requests in a master roster.
+<!-- 
+  **[Google Form](https://docs.google.com/forms/d/e/1FAIpQLSfrlZXWRdllpkllha9Abfib57qJcKrRfeHHW3kSmA2b3FZ_QA/viewform?usp=sf_link)**
+  **[Google Sheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit#gid=790260459)**
+-->
+
+- A Google form that students submit extension requests to.
+- A Google Sheet that collects student extension requests and tracks all extension requests in a master roster.
 - A **Google Cloud Function** that contains core business logic that:
   - Receives form data through a simple **Google Apps Script** trigger.
   - Process form data in combination with a student's "record" (which includes DSP status and prior extension requests) to enter either an auto-approval or manual-approval flow.
