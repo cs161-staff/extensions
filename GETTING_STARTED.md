@@ -1,6 +1,6 @@
 # Getting Started
 
-If you'd like us to walk you through setup, feel free to email fuzailshakir@berkeley.edu or join the `#161-extension-bot` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like!
+If you'd like us to walk you through setup, please message the `#161-extension-bot` channel on EECS Crossroads. That said, all of this is self-serve, so you could follow this guide entirely by yourself if you'd like! Please check out [FAQ.md](https://github.com/cs161-staff/extensions/blob/master/FAQ.md) for debugging and quick tips for how to use the backend.
 
 It takes ~15 minutes to onboard your class onto this tool, and that time pays off as soon as your first extension requests start rolling in :)
 
@@ -23,7 +23,7 @@ _Estimated Time: 10 minutes_
 
 **Cloning the Form/Sheet**
 
-1. Make a copy of [this spreadsheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit?usp=sharing). Make sure to rename it to "CS \_\_\_ SP22 Extensions Backend"
+1. Make a copy of [this spreadsheet](https://docs.google.com/spreadsheets/d/1BabID1n6fPgeuuO4-1r3mkoQ9Nx5dquNwdsET75In1E/edit?usp=sharing). Make sure to rename it to "CS \_\_\_ \[SemesterYear\] Extensions Backend" where \[SemesterYear\] is the semester and year you are setting the backend up for, eg. SP22.
 2. Delete the “Form Responses” sheet within the spreadsheet.
 3. Share the spreadsheet with [cs-161-extensions@appspot.gserviceaccount.com](mailto:cs-161-extensions@appspot.gserviceaccount.com). This allows our hosted cloud function to read/write to your sheet. (If you're self-hosting, this should be your service account email.)
 4. Make a copy of [this form](https://docs.google.com/forms/d/1uc9NUwxLnfTc1Zlv0Dec1A1Jsu5UYR7-0K2kfTR0Zqs/edit). Make sure to rename it. Close the form template, so you don't accidentally edit it.
@@ -36,7 +36,7 @@ _Estimated Time: 10 minutes_
 
 7. On the **Spreadsheet**, open the **Extensions => Apps Script** menu option.
 
-   - Rename the script to "CS \_\_\_\_ SP22 Extension Requests Script".
+   - Rename the script to "CS \_\_\_\_ \[SemesterYear\] Extension Requests Script" where \[SemesterYear\] is the semester and year you are setting the backend up for, eg. SP22.
 
    - Click on "Triggers" in the sidebar (the little clock icon).
 
